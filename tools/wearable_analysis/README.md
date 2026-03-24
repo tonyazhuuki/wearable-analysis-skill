@@ -135,14 +135,31 @@ See `user_config.template.yaml` for all options. Key settings:
 | `domains.cycle` | Enable menstrual cycle hypotheses | `false` |
 | `health_context` | Optional: conditions, meds, genetics | `{}` |
 
-## Supported Devices
+## Getting Your Data
 
-| Device | Status | Notes |
-|--------|--------|-------|
-| **WHOOP** | Full support | MCP JSON sync via `whoop_sync_mcp.py` |
-| **Oura** | Schema ready, adapter planned | Use GenericCSVAdapter with CSV export |
-| **Garmin** | Schema ready, adapter planned | Use GenericCSVAdapter with CSV export |
-| **Generic CSV** | Supported | Any wearable data with date column |
+### WHOOP
+
+**Option 1: WHOOP MCP (recommended)**
+If you have the WHOOP MCP server for Claude Code, your data syncs automatically as JSON files.
+Point `device.data_dir` to your MCP sync folder.
+
+**Option 2: WHOOP CSV Export**
+1. Open WHOOP app → Profile → Download My Data
+2. You'll receive a ZIP with CSV files
+3. Extract to a folder and point `device.data_dir` to it
+4. The pipeline will auto-detect CSV format
+
+**Option 3: WHOOP API**
+Export via WHOOP Developer API → save as JSON per metric type (Recovery.json, Sleep.json, etc.)
+
+### Other Devices
+
+| Device | Status | How to get data |
+|--------|--------|----------------|
+| **WHOOP** | Full support | MCP sync, CSV export, or API |
+| **Oura** | Schema ready | Export CSV from Oura app → use GenericCSV adapter |
+| **Garmin** | Schema ready | Garmin Connect CSV export → use GenericCSV adapter |
+| **Any wearable** | Supported | Export as CSV with date column → GenericCSV adapter |
 
 ## Telegram Notifications
 
@@ -150,7 +167,7 @@ The `--notify` flag on the `portrait` command sends:
 1. A summary message with domain grades
 2. The HTML report as a document attachment
 
-Credentials are read from `~/Cursor/your-telegram-bot/.env` (same as other Second Brain tools).
+Credentials are read from `your Telegram bot .env file` (same as other Second Brain tools).
 
 ## License
 

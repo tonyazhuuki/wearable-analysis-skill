@@ -48,6 +48,8 @@ def main():
                         help='Report language (default: ru)')
     parser.add_argument('--notify', action='store_true',
                         help='Send Telegram notification with summary + HTML report')
+    parser.add_argument('--no-open', action='store_true',
+                        help='Do not open HTML report in browser')
     args = parser.parse_args()
 
     # Import pipeline modules (after path setup)
@@ -57,8 +59,22 @@ def main():
     from wearable_analysis.personalize import population_comparison
     from wearable_analysis.config import load_user_config
 
+    # ── Auto-setup: create user_config.yaml if missing ───────────
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, 'user_config.yaml')
+    template_path = os.path.join(script_dir, 'user_config.template.yaml')
+    if not os.path.exists(config_path) and os.path.exists(template_path):
+        import shutil
+        shutil.copy2(template_path, config_path)
+        logger.info(f"Created user_config.yaml from template — edit it to customize")
+
+    # ── Auto-setup: create venv if missing ────────────────────────
+    venv_path = os.path.join(script_dir, '.venv')
+    if not os.path.exists(venv_path):
+        logger.info("No .venv found — hint: run 'python3 -m venv .venv && source .venv/bin/activate && pip install pandas numpy scipy scikit-learn matplotlib seaborn pyyaml statsmodels'")
+
     # Resolve paths relative to project root (grandparent: tools/wearable_analysis/ → tools/ → project_root)
-    script_dir = os.path.dirname(os.path.abspath(__file__))  # tools/wearable_analysis/
+    # script_dir already set above
     tools_dir = os.path.dirname(script_dir)                   # tools/
     project_root = os.path.dirname(tools_dir)                 # project root
     if os.path.isabs(args.data_dir):
@@ -140,6 +156,13 @@ def main():
         f'{k}={v["grade"]}' for k, v in grades.items())
     logger.info(f"Domain grades: {grade_summary}")
     logger.info(f"Output directory: {output_dir}")
+
+    # ── Open in browser ───────────────────────────────────────────
+    if not getattr(args, 'no_open', False):
+        import webbrowser
+        url = 'file://' + os.path.abspath(html_path)
+        webbrowser.open(url)
+        logger.info(f"Opened in browser: {url}")
 
     # ── Optional: Telegram notification ───────────────────────────
     if getattr(args, 'notify', False):
