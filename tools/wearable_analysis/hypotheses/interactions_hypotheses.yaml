@@ -1,0 +1,218 @@
+# Interaction Hypotheses — Pre-registered for N=1 Wearable Data Analysis
+# Generated: 2026-02-12
+# Updated: 2026-03-20 (cleaned for external sharing — personal data removed)
+# Domain: Multi-variable interactions, mediation chains, compound effects
+# Sources: Synthesized from multiple peer-reviewed domains (sleep, stress, exercise, iron metabolism)
+# Consensus coverage: Recovery & HRV, Sleep, Stress Management, Training Polarization,
+#   Exercise Outcomes, Menstrual Cycle × Wearable Metrics, Caffeine, Respiratory Rate,
+#   Strength Training Dose-Response, Body Comp × Biological Age, Wearable Vital Signs
+
+- id: INT_001
+  domain: interactions
+  hypothesis: "High training strain combined with less than 7 hours of sleep produces the worst recovery outcomes, with a gap of >15 percentage points versus adequate sleep"
+  source: "Bishop 2008 Sports Medicine; Van Dongen 2003 Sleep"
+  prediction: "2x2 analysis: high-strain + short-sleep quadrant shows recovery score >15pp lower than high-strain + adequate-sleep quadrant; sleep moderates the strain-recovery relationship"
+  test_type: interaction
+  test_spec: "contingency_2x2(strain_binary=strain > median, sleep_binary=sleep_hours >= 7, outcome=recovery_score, test='two_way_anova')"
+  variables: [strain, sleep_hours, recovery_score]
+  population_effect: "Sleep restriction (<6h) impairs glycogen resynthesis by 20-30% and GH secretion by 60-70% (Van Dongen 2003); compounded with high strain recovery deficit"
+  actionable: true
+  action_if_confirmed: "After high-strain days, sleep is the single most important recovery lever — target 8h minimum; never pair hard training with known short-sleep nights"
+  action_if_refuted: "Sleep and strain may have independent effects on recovery; each can be managed separately"
+  priority: high
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "Training x recovery x sleep triangle; only 3 Grade A interventions (sleep, iron, creatine)"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "sleep"
+      finding: "Iron repletion = #1 for PSQI improvement; exercise x sleep bidirectional; 4-day-type constraint-adapted protocol"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+
+- id: INT_002
+  domain: interactions
+  hypothesis: "3-day cumulative stress multiplied by 3-day sleep debt produces a multiplicative recovery impairment"
+  source: "Akerstedt 2007 J Sleep Research; Minkel 2012 Emotion"
+  prediction: "Interaction term (stress_3d x sleep_debt_3d) is significant above main effects; combined deficit periods show recovery 20-30% below predicted additive model"
+  test_type: interaction
+  test_spec: "interaction_regression(recovery ~ stress_3d_rolling + sleep_debt_3d + stress_3d_rolling:sleep_debt_3d)"
+  variables: [stress_3d_rolling, sleep_debt_3d, recovery_score]
+  population_effect: "Cumulative sleep debt amplifies HPA axis dysregulation from chronic stress (McEwen 1998); 3-day accumulation window captures allostatic load buildup"
+  actionable: true
+  action_if_confirmed: "Track 3-day compound stress-sleep metric as early warning; when both are trending bad for 2+ days, declare recovery emergency (cancel hard training, extend sleep, reduce commitments)"
+  action_if_refuted: "Effects are additive over multi-day windows; standard daily management is sufficient"
+  priority: high
+  consensus_ref:
+    - id: "stress_mgmt"
+      finding: "Allostatic load McEwen model; burnout staging; 10 feedback loops; cumulative stress = non-linear"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+    - id: "sleep"
+      finding: "Sleep debt accumulates; 4-day-type constraint-adapted protocol accounts for multi-night effects"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+
+- id: INT_003
+  domain: interactions
+  hypothesis: "Late bedtime amplifies the strain-to-recovery deficit beyond what short sleep duration alone explains"
+  source: "Wittmann 2006 Chronobiology International (social jetlag); Bishop 2008 Sports Medicine"
+  prediction: "Three-way analysis: high strain + late bedtime shows worse recovery than high strain + early bedtime, even controlling for total sleep hours; circadian misalignment adds independent impairment"
+  test_type: interaction
+  test_spec: "regression(recovery ~ strain + sleep_hours + bedtime_deviation + strain:bedtime_deviation, control_for=sleep_hours)"
+  variables: [strain, sleep_hours, bedtime_time, recovery_score]
+  population_effect: "Social jetlag (>1h bedtime shift) reduces deep sleep by 10-15% and delays cortisol nadir (Wittmann 2006); compounds with training recovery needs"
+  actionable: true
+  action_if_confirmed: "Consistent bedtime is as important as sleep duration; after high-strain days, maintain regular bedtime even if it means going to bed earlier"
+  action_if_refuted: "Bedtime timing is less important than total sleep duration for this individual; focus on sleep quantity over timing"
+  priority: medium
+  consensus_ref:
+    - id: "sleep"
+      finding: "Circadian protocol = #3 intervention; social jetlag reduces SWS; bedtime consistency is core to sleep quality"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "whoop_deep"
+      finding: "N=1 example: late and variable bedtime identified as #1 actionable lever for recovery improvement"
+      grade: "N=1"
+      path: "health/automated_reviews/2026_02_whoop_deep_analysis/synthesis.md"
+    - id: "caffeine"
+      finding: "100mg cutoff dose-dependent: 200mg->08-09, 100mg->10-12 — caffeine timing interacts with bedtime"
+      grade: "B"
+      path: "nutrition/automated_reviews/2026_03_caffeine_all_sources/consensus_reference.md"
+
+- id: INT_004
+  domain: interactions
+  hypothesis: "RHR and VO2max are temporally coupled: as RHR decreases through training adaptation, VO2max ceiling rises"
+  source: "Physiological coupling through stroke volume adaptation (Warburton 2006 CMAJ)"
+  prediction: "Negative temporal covariance between 30-day rolling RHR and 30-day rolling VO2max; RHR decrease of 1 bpm associated with VO2max increase of 0.3-0.5 mL/kg/min"
+  test_type: correlation
+  test_spec: "temporal_covariance(rhr_30d_rolling, vo2max_30d_rolling, method='pearson') AND lagged_correlation(rhr_30d, vo2max_30d, lags=[0, 7, 14, 30])"
+  variables: [rhr_30d_rolling, vo2max_30d_rolling]
+  population_effect: "Stroke volume adaptation increases cardiac output per beat; RHR drops as heart becomes more efficient; directly enables higher VO2max ceiling"
+  actionable: true
+  action_if_confirmed: "Track RHR as a leading indicator of VO2max progress; RHR plateau signals VO2max plateau — need training stimulus change"
+  action_if_refuted: "RHR and VO2max may be driven by different adaptations (peripheral vs central); track independently"
+  priority: medium
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "RHR decomposition: iron +1.5-3.5 bpm is dominant contributor; iron repletion -> RHR drop -> HRV improvement cascade"
+      grade: "B+"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "exercise_outcomes"
+      finding: "VO2max = strongest single ACM predictor; HR 0.87 per 1-MET increase"
+      grade: "A"
+      path: "training/automated_reviews/2026_02_exercise_outcomes_consensus/consensus_reference.md"
+    - id: "body_comp_bioage"
+      finding: "VO2max as bioage proxy; body comp at low BF% explains <5% of wearable variance — RHR-VO2max coupling dominated by cardiovascular adaptation, not composition"
+      grade: "B"
+      path: "health/automated_reviews/2026_03_body_comp_biological_age/consensus_reference.md"
+
+- id: INT_005
+  domain: interactions
+  hypothesis: "Iron supplementation triggers a mediation chain: iron repletion leads to RHR decrease, which leads to HRV increase, which leads to recovery score improvement"
+  source: "Yokusoglu 2007 Ann Noninvasive Electrocardiol; Tuncer 2009 Ann Hematol; Burden 2015 Sports Medicine"
+  prediction: "Sequential mediation: time_since_iron_start predicts RHR decrease (path a); RHR decrease predicts HRV increase (path b); HRV increase predicts recovery improvement (path c); indirect effect is significant"
+  test_type: mediation
+  test_spec: "mediation_chain(X=weeks_since_iron_start, M1=rhr_7d_rolling, M2=hrv_7d_rolling, Y=recovery_7d_rolling, method='baron_kenny')"
+  variables: [iron_supplementation_start_date, rhr, hrv_rmssd, recovery_score]
+  population_effect: "Iron repletion reduces sympathetic overdrive (RHR -3-8 bpm) within 4-8 weeks (Tuncer 2009); autonomic normalization (HRV +20-40%) follows (Yokusoglu 2007)"
+  actionable: true
+  action_if_confirmed: "Iron supplementation has cascading benefits beyond oxygen carrying capacity; monitor RHR as earliest signal of iron response (before lab ferritin changes are measurable)"
+  action_if_refuted: "Recovery improvement from iron may bypass autonomic pathway (e.g., direct oxygen delivery improvement); or iron is not the bottleneck"
+  priority: high
+  applies_to:
+    conditions: [iron_deficiency]
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "Iron->RHR->HRV cascade (7 mechanisms); ZERO direct RCTs for oral iron -> HRV in athletes; brain iron lag 8-20 weeks; RMSSD gain +5-40 ms (80% CI); full autonomic recovery 24-52+ weeks"
+      grade: "B+ (mechanistic, ZERO direct RCTs)"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "whoop_deep"
+      finding: "N=1 example: RHR identified as bottleneck; HRV decline fully mediated by RHR"
+      grade: "N=1"
+      path: "health/automated_reviews/2026_02_whoop_deep_analysis/synthesis.md"
+    - id: "menstrual_cycle"
+      finding: "IDA effect 3-5x larger than menstrual cycle effect on wearable metrics; IDA likely adds flat RHR offset (55% probability)"
+      grade: "D+ (no direct studies)"
+      path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+    - id: "body_comp_bioage"
+      finding: "Body comp <5% of wearable variance; iron status and cardiovascular fitness dominate the mediation chain"
+      grade: "B"
+      path: "health/automated_reviews/2026_03_body_comp_biological_age/consensus_reference.md"
+
+- id: INT_006
+  domain: interactions
+  hypothesis: "3-day cumulative sleep debt amplifies the impact of daily stress on recovery"
+  source: "Van Dongen 2003 Sleep; McEwen 1998 New England J Med"
+  prediction: "Interaction term (stress_daily x sleep_debt_3d) is significant; on days of high stress, recovery is much worse when 3-day sleep debt exists than when sleep is adequate"
+  test_type: interaction
+  test_spec: "interaction_regression(recovery ~ stress_daily * sleep_debt_3d) AND simple_slopes(stress_daily, at_values_of=sleep_debt_3d_tertiles)"
+  variables: [stress_daily, sleep_debt_3d, recovery_score]
+  population_effect: "Sleep debt reduces prefrontal cortex regulation of amygdala by 60% (Yoo 2007 Current Biology); amplifies cortisol response to stressors by 30-45% (Van Dongen 2003)"
+  actionable: true
+  action_if_confirmed: "Sleep debt is the vulnerability amplifier: prioritize sleep debt repayment before stressful periods (deadlines, competitions, travel)"
+  action_if_refuted: "Daily stress impact is stable regardless of sleep history; manage each day independently"
+  priority: high
+  consensus_ref:
+    - id: "sleep"
+      finding: "Sleep debt accumulates non-linearly; 4-day-type constraint-adapted protocol; iron repletion = #1 for PSQI improvement"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "stress_mgmt"
+      finding: "Allostatic load McEwen model; somatic-only Phase 1 recommended when iron-deficient (prefrontal impairment); burnout recovery phenotyping"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+
+- id: INT_007
+  domain: interactions
+  hypothesis: "Deep sleep percentage moderates recovery from high training strain: high strain combined with low deep sleep percentage produces prolonged multi-day recovery deficit"
+  source: "Halson 2014 Sports Medicine; Dattilo 2011 Medical Hypotheses"
+  prediction: "After strain >12 days, recovery trajectory back to baseline is 1-2 days longer when deep sleep percentage is in bottom tertile vs top tertile; deep sleep is when growth hormone release peaks"
+  test_type: interaction
+  test_spec: "recovery_trajectory_by_group(trigger=strain > 12, groupby=deep_pct_tertile, window_days=5, metric=recovery_score)"
+  variables: [strain, deep_sleep_pct, recovery_score]
+  population_effect: "70-80% of daily GH secretion occurs during SWS (Van Cauter 2000); GH is critical for muscle repair and glycogen resynthesis (Dattilo 2011)"
+  actionable: true
+  action_if_confirmed: "Protect deep sleep quality on high-strain days: no alcohol, no late meals, cool room temperature, consistent bedtime; consider magnesium supplementation"
+  action_if_refuted: "Deep sleep percentage may not vary enough in this individual to detect moderation; or total sleep hours matter more than sleep architecture"
+  priority: medium
+  consensus_ref:
+    - id: "sleep"
+      finding: "Sleep architecture Grade A; SWS = 70-80% GH secretion; CBT-I > pharmacotherapy; temperature and timing are primary SWS modulators"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "recovery_hrv"
+      finding: "Training x recovery x sleep triangle; only 3 Grade A interventions (sleep, iron, creatine)"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "magnesium"
+      finding: "Mg sleep d=0.2 below MCID; glycine 40-60% of bisglycinate benefit — marginal but non-zero for SWS"
+      grade: "C"
+      path: "nutrition/automated_reviews/2026_02_magnesium_consensus/consensus_reference.md"
+    - id: "strength_rt"
+      finding: "RT DOMS 24-48h recovery; high-strain RT days need deep sleep protection; RT GH response amplified by SWS"
+      grade: "B"
+      path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+
+- id: INT_008
+  domain: interactions
+  hypothesis: "Day-of-week creates systematic patterns in recovery due to behavioral regularity effects on sleep, strain, and stress"
+  source: "Behavioral regularity effect (Monk 2003 Chronobiology International); social jetlag (Wittmann 2006)"
+  prediction: "ANOVA of recovery by day-of-week is significant; specific days (e.g., Monday after weekend, day after regular game night) are systematically lower; patterns explained by strain and sleep timing differences"
+  test_type: interaction
+  test_spec: "anova(recovery ~ day_of_week) AND post_hoc_tukey(recovery, day_of_week) AND explain_by(recovery_dow_residuals ~ strain_dow + sleep_hours_dow + bedtime_dow)"
+  variables: [recovery_score, day_of_week, strain, sleep_hours, bedtime_time]
+  population_effect: "Social jetlag affects 70% of population (Wittmann 2006); weekend-weekday behavioral shifts create systematic recovery variation"
+  actionable: true
+  action_if_confirmed: "Identify vulnerable days and pre-compensate: if Monday recovery is systematically low, protect Sunday sleep; schedule hard training on consistently high-recovery days"
+  action_if_refuted: "No systematic day-of-week pattern; recovery is primarily driven by day-to-day variable inputs, not weekly rhythm"
+  priority: medium
+  consensus_ref:
+    - id: "sleep"
+      finding: "Social jetlag reduces SWS; circadian consistency = core intervention; weekend-weekday shifts = risk factor"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "menstrual_cycle"
+      finding: "Menstrual cycle = 19% of RR variance, ~15-20% of RHR variance — cycle phase confounds day-of-week patterns"
+      grade: "MODERATE"
+      path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"

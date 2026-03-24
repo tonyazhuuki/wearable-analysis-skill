@@ -1,0 +1,230 @@
+# Sleep & Wearable Data Hypotheses
+# Grounded in peer-reviewed research
+# Created: 2026-02-12
+# Updated: 2026-03-20 (cleaned for external sharing — personal data removed)
+# Format: structured for automated testing pipeline
+# Consensus coverage: Sleep, Recovery & HRV, Stress Management, Caffeine,
+#   Respiratory Rate, Menstrual Cycle × Wearable Metrics, Magnesium,
+#   Wearable Vital Signs (nap science, skin temp, SpO2)
+
+- id: SLEEP_001
+  domain: sleep
+  hypothesis: "Total sleep duration of 7.0-8.5 hours is optimal for physiological recovery as measured by wearable metrics"
+  source: "Buysse 2014 SLEEP; Hirshkowitz 2015 Sleep Health (NSF guidelines)"
+  prediction: "Recovery scores peak in the 7.0-8.5h bin and decline both below 7.0h and above 9.0h, forming an inverted-U curve"
+  test_type: dose_response
+  test_spec: "bin sleep_hours into [5.5,6.0,6.5,7.0,7.5,8.0,8.5,9.0,9.5]; compute mean recovery per bin; fit quadratic model; test peak location within 7.0-8.5"
+  variables: [sleep_hours, recovery_score]
+  population_effect: "r = 0.30-0.40 between sleep duration and health outcomes; meta-analytic optimal range 7-8h for all-cause mortality"
+  actionable: true
+  action_if_confirmed: "Target 7.0-8.5h sleep window; set wearable sleep goal to 7.5h minimum"
+  action_if_refuted: "Individual optimum may differ from population norm; explore personal dose-response curve with finer bins"
+  priority: high
+  consensus_ref:
+    - id: "sleep"
+      finding: "8 consensus findings Grade A; iron repletion = #1 for PSQI improvement; adaptation blunting largely irrelevant for game sports"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+
+- id: SLEEP_002
+  domain: sleep
+  hypothesis: "Sleep timing consistency (regularity) is a stronger predictor of recovery than total sleep duration"
+  source: "Phillips 2017 Scientific Reports; Lunsford-Avery 2018 Journal of Sleep Research"
+  prediction: "Nights within the most consistent quartile of sleep timing show higher mean recovery than the longest-duration quartile, independent of total hours"
+  test_type: correlation
+  test_spec: "compute sleep_regularity_index (SRI) as 7d rolling SD of bedtime + wake time; quartile split on SRI and on sleep_hours; compare recovery means across quartiles; partial correlation of SRI vs recovery controlling for sleep_hours"
+  variables: [bedtime, wake_time, sleep_hours, recovery_score]
+  population_effect: "Irregular sleepers show 27% higher cardiovascular risk (Phillips 2017); SRI explains variance in daytime functioning beyond duration"
+  actionable: true
+  action_if_confirmed: "Prioritize fixed bed/wake times over extending total duration; set consistent alarms even on weekends"
+  action_if_refuted: "Duration may dominate for this individual; focus on total hours first, regularity second"
+  priority: high
+  consensus_ref:
+    - id: "sleep"
+      finding: "Circadian protocol = #3 intervention (fixed wake + morning light); bedtime consistency is core to circadian health"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "whoop_deep"
+      finding: "N=1 example: late and variable bedtime identified as #1 actionable lever"
+      grade: "N=1"
+      path: "health/automated_reviews/2026_02_whoop_deep_analysis/synthesis.md"
+
+- id: SLEEP_003
+  domain: sleep
+  hypothesis: "Bedtime variability has a stronger negative association with HRV than sleep duration variability"
+  source: "Huang 2020 Sleep Medicine; Windred 2024 Sleep"
+  prediction: "Partial correlation between 7d bedtime SD and HRV (controlling for duration) is stronger (|r| > 0.15) than partial correlation between duration SD and HRV (controlling for bedtime)"
+  test_type: correlation
+  test_spec: "compute bedtime_sd_7d = rolling 7d SD of bedtime_hour; compute duration_sd_7d = rolling 7d SD of sleep_hours; partial_corr(bedtime_sd_7d, hrv, covariates=[sleep_hours]); partial_corr(duration_sd_7d, hrv, covariates=[bedtime_hour]); compare effect sizes"
+  variables: [bedtime_hour, sleep_hours, hrv]
+  population_effect: "Bedtime variability SD >60 min associated with 12% lower HRV (Windred 2024); effect persists after controlling for duration"
+  actionable: true
+  action_if_confirmed: "Lock bedtime within a 30-min window; allow duration to flex via wake time rather than bedtime shifts"
+  action_if_refuted: "Duration stability may matter more; focus on consistent total hours rather than rigid bedtime"
+  priority: high
+  consensus_ref:
+    - id: "sleep"
+      finding: "Circadian biology Grade A; consistency of bedtime/wake time is core to circadian protocol (#3 intervention)"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "recovery_hrv"
+      finding: "Training x recovery x sleep triangle — bedtime regularity feeds into HRV stability"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+
+- id: SLEEP_004
+  domain: sleep
+  hypothesis: "Cumulative sleep debt over 3-5 nights predicts recovery better than single-night deficit"
+  source: "Van Dongen 2003 SLEEP (N=48, landmark chronic restriction study)"
+  prediction: "3-night cumulative sleep debt (sum of deficit from personal baseline over 3 nights) correlates with recovery at r > 0.25, while single-night deficit alone correlates at r < 0.15"
+  test_type: causal_lag
+  test_spec: "compute personal_baseline = rolling 14d mean sleep_hours; single_night_debt = baseline - sleep_hours; cumulative_3d_debt = rolling_sum(single_night_debt, window=3); correlate both with recovery_score; compare r-values using Steiger Z-test"
+  variables: [sleep_hours, recovery_score]
+  population_effect: "3 consecutive nights at 6h produces cognitive impairment equivalent to 1 night of total sleep deprivation (Van Dongen 2003)"
+  actionable: true
+  action_if_confirmed: "Track cumulative 3d debt as primary sleep metric; after 2 short nights, prioritize a full recovery night before the third"
+  action_if_refuted: "Recovery may be more resilient to multi-night debt than lab studies suggest; single-night recovery may suffice"
+  priority: high
+  consensus_ref:
+    - id: "sleep"
+      finding: "4-day-type constraint-adapted protocol; sleep debt accumulates non-linearly"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "stress_mgmt"
+      finding: "Allostatic load McEwen model — cumulative stress + sleep debt compound; burnout staging"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+
+- id: SLEEP_005
+  domain: sleep
+  hypothesis: "Deep sleep (slow-wave sleep) percentage below 15% of total sleep is associated with inadequate recovery"
+  source: "Dijk 2010 Sleep Medicine Clinics; Leger 2018 Nature and Science of Sleep"
+  prediction: "Nights with deep sleep percentage below 15% show mean recovery scores at least 5 points lower than nights with deep sleep 15-25%"
+  test_type: threshold
+  test_spec: "bin deep_sleep_pct at thresholds [10, 15, 20, 25]; compare mean recovery per bin; t-test between below_15 group and 15-25 group; compute Cohen's d"
+  variables: [deep_sleep_pct, recovery_score]
+  population_effect: "Normal adult deep sleep range is 15-25% of total sleep; <15% associated with daytime cognitive impairment and metabolic dysfunction"
+  actionable: true
+  action_if_confirmed: "If deep sleep consistently <15%, investigate causes: alcohol, late meals, high room temperature, overtraining; consider cooling interventions"
+  action_if_refuted: "Individual deep sleep needs may differ from population norms; wearable deep sleep detection may lack accuracy for threshold-based decisions"
+  priority: medium
+  consensus_ref:
+    - id: "sleep"
+      finding: "Sleep architecture Grade A; SWS = 70-80% of GH secretion; deep sleep is when key recovery processes peak"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "magnesium"
+      finding: "Mg sleep effect d=0.2 below MCID (P clinically meaningful <20%); glycine 40-60% of bisglycinate benefit — marginal deep sleep aid"
+      grade: "C"
+      path: "nutrition/automated_reviews/2026_02_magnesium_consensus/consensus_reference.md"
+
+- id: SLEEP_006
+  domain: sleep
+  hypothesis: "More than 5 wake events per night degrades recovery regardless of total sleep duration"
+  source: "Bonnet & Arand 2003 Sleep Medicine Reviews"
+  prediction: "Nights with wake_events >5 show recovery scores equivalent to sleeping approximately 2 hours less, after controlling for total sleep duration"
+  test_type: threshold
+  test_spec: "split nights into wake_events >5 vs <=3; ANCOVA or regression: recovery ~ wake_events_group + sleep_hours; test that wake_events >5 coefficient is significant and equivalent to approximately -2h of sleep effect"
+  variables: [wake_events, sleep_hours, recovery_score]
+  population_effect: "Experimentally fragmented sleep with preserved duration produces next-day impairment equivalent to 2h sleep restriction (Bonnet & Arand 2003)"
+  actionable: true
+  action_if_confirmed: "Investigate fragmentation causes: noise, temperature, pets, partner movement, nocturia; consider environment modifications"
+  action_if_refuted: "Brief awakenings captured by wearable may not reflect true cortical arousals; fragmentation metric may need recalibration"
+  priority: medium
+  consensus_ref:
+    - id: "sleep"
+      finding: "Sleep fragmentation evidence in 228-finding database; fragmented sleep degrades recovery via GH suppression and cortisol elevation"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+
+- id: SLEEP_007
+  domain: sleep
+  hypothesis: "Bedtime later than 01:00 reduces deep sleep percentage independently of total sleep duration"
+  source: "Wittmann 2006 Chronobiology International; Montaruli 2021 International Journal of Environmental Research and Public Health"
+  prediction: "Nights with bedtime after 01:00 show deep sleep percentage at least 3 percentage points lower than nights with bedtime before 23:30, after controlling for total sleep hours"
+  test_type: correlation
+  test_spec: "regression: deep_sleep_pct ~ bedtime_hour + sleep_hours; test bedtime_hour coefficient significance; additionally compare bedtime bins [before 23:00, 23:00-00:00, 00:00-01:00, after 01:00] with sleep_hours as covariate"
+  variables: [bedtime_hour, sleep_hours, deep_sleep_pct]
+  population_effect: "Social jetlag >2h associated with reduced slow-wave sleep and altered sleep architecture (Wittmann 2006); circadian misalignment reduces SWS opportunity"
+  actionable: true
+  action_if_confirmed: "Set hard bedtime ceiling at 00:30; on late nights, accept reduced deep sleep and plan compensatory early night within 48h"
+  action_if_refuted: "Circadian flexibility may be greater than expected; chronotype may override clock time effects"
+  priority: medium
+  consensus_ref:
+    - id: "sleep"
+      finding: "Circadian misalignment reduces SWS; late bedtime = social jetlag"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "caffeine"
+      finding: "SWS threshold ~20-30mg residual caffeine; 100mg cutoff dose-dependent (200mg->08-09, 100mg->10-12)"
+      grade: "B"
+      path: "nutrition/automated_reviews/2026_03_caffeine_all_sources/consensus_reference.md"
+
+- id: SLEEP_008
+  domain: sleep
+  hypothesis: "Sleep efficiency below 85% is a threshold marker for poor recovery outcomes"
+  source: "Buysse 2014 (Pittsburgh Sleep Quality Index norms); Reed & Sacco 2016 Journal of Clinical Sleep Medicine"
+  prediction: "Nights with sleep efficiency <85% show significantly lower recovery (Cohen's d > 0.3) compared to nights with efficiency 85-95%"
+  test_type: threshold
+  test_spec: "compute sleep_efficiency = (sleep_hours / time_in_bed_hours) * 100; bin into [<75, 75-80, 80-85, 85-90, 90-95, >95]; compare mean recovery across bins; t-test at 85% cutoff; compute effect size"
+  variables: [sleep_hours, time_in_bed, sleep_efficiency, recovery_score]
+  population_effect: "Sleep efficiency <85% is the clinical threshold for poor sleep per PSQI norms; associated with insomnia diagnosis"
+  actionable: true
+  action_if_confirmed: "If efficiency chronically <85%, reduce time in bed to compress sleep (stimulus control / sleep restriction principles); avoid lying awake >20 min"
+  action_if_refuted: "Wearable-measured efficiency may not align with PSG-derived clinical thresholds; recalibrate personal efficiency target"
+  priority: medium
+  consensus_ref:
+    - id: "sleep"
+      finding: "CBT-I > pharmacotherapy Grade A; sleep efficiency <85% = clinical threshold (PSQI); stimulus control + sleep restriction principles"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+
+- id: SLEEP_009
+  domain: sleep
+  hypothesis: "Respiratory rate elevation of +1 brpm above personal baseline predicts illness or low recovery 1-2 days before symptom onset"
+  source: "Natarajan 2020 (Fitbit study, N=47K); Miller 2020 Cell Reports Medicine"
+  prediction: "A +1 brpm deviation in overnight respiratory rate from 14d rolling mean precedes illness-tagged days or recovery <33rd percentile by 1-2 days with sensitivity >60%"
+  test_type: temporal
+  test_spec: "compute rr_baseline = rolling 14d mean respiratory_rate; rr_deviation = respiratory_rate - rr_baseline; flag days where rr_deviation >= 1.0; cross-correlate with illness_flag or low_recovery (bottom tertile) at lags [0, 1, 2, 3] days; compute sensitivity and specificity at each lag"
+  variables: [respiratory_rate, recovery_score, illness_flag]
+  population_effect: "+0.5 brpm detected COVID-19 and influenza 1-2 days pre-symptom in 47K Fitbit users (Natarajan 2020); AUC 0.72 for illness prediction"
+  actionable: true
+  action_if_confirmed: "When respiratory rate rises +1 brpm above baseline: reduce training intensity, increase sleep target by 1h, add zinc and vitamin C prophylactically"
+  action_if_refuted: "Respiratory rate variability may be too noisy in individual data; consider combining with resting HR for multi-signal illness prediction"
+  priority: high
+  consensus_ref:
+    - id: "resp_rate"
+      finding: "RR NOT part of cardiac autonomic axis (PCA PC2); standalone clinical utility near zero; multi-signal rule required; wearable RR +/-1 brpm accuracy; menstrual cycle = 19% of RR variance"
+      grade: "D+ (standalone)"
+      path: "health/automated_reviews/2026_03_respiratory_rate_consensus/consensus_reference.md"
+    - id: "menstrual_cycle"
+      finding: "Menstrual cycle confounds RR time-series (24.5-day period); must control for cycle phase"
+      grade: "MODERATE"
+      path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+    - id: "vital_signs"
+      finding: "Signal hierarchy: RHR > HRV > Skin Temp (multi-signal) > RR > SpO2; multi-signal reduces false positives 2-5x vs single metric"
+      grade: "C+"
+      path: "health/automated_reviews/2026_03_wearable_vital_signs/consensus_reference.md"
+
+- id: SLEEP_010
+  domain: sleep
+  hypothesis: "Nocturnal heart rate elevated more than 5% above personal baseline predicts reduced recovery the next day"
+  source: "Buchheit 2014 Sports Medicine; Duking 2018 Sports Medicine - Open"
+  prediction: "Nights where mean sleep HR exceeds 14d rolling baseline by >5% are followed by next-day recovery scores at least 8 points below personal mean"
+  test_type: causal_lag
+  test_spec: "compute hr_baseline = rolling 14d mean of sleep_hr_avg; hr_deviation_pct = (sleep_hr_avg - hr_baseline) / hr_baseline * 100; flag nights where hr_deviation_pct > 5; compare next-day recovery on flagged vs unflagged nights; compute effect size; also test as continuous predictor: next_day_recovery ~ hr_deviation_pct"
+  variables: [sleep_hr_avg, recovery_score]
+  population_effect: "Nocturnal HR >5% above baseline reflects sympathetic dominance and incomplete parasympathetic recovery; associated with reduced HRV next morning (Buchheit 2014)"
+  actionable: true
+  action_if_confirmed: "When sleep HR exceeds baseline by >5%: next day is a mandatory easy/rest day; investigate cause (alcohol, stress, overtraining, illness)"
+  action_if_refuted: "HR elevation may reflect benign causes (hydration, ambient temperature) rather than recovery impairment; combine with HRV for better signal"
+  priority: high
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "RHR decomposition: iron +1.5-3.5 bpm, non-iron +0.5-2.0 bpm; nocturnal HR elevation = sympathetic dominance marker"
+      grade: "B+"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "sleep"
+      finding: "Exercise x sleep bidirectional; late training elevates nocturnal HR"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"

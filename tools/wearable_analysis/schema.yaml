@@ -1,0 +1,1466 @@
+# WHOOP Data Schema Registry — Single Source of Truth
+# Every WHOOP field → internal column name, type, unit, aliases
+# Used by: ingest.py, hypothesis_test.py, eda.py, personalize.py
+#
+# Convention:
+#   whoop_keys: exact field names as they appear in WHOOP MCP JSON (try in order)
+#   internal: our standardized column name
+#   aliases: names that hypothesis YAMLs or other code might use
+#   type: float | int | str | pct (percentage 0-100) | duration (hours) | datetime
+#   required: true = error if missing, false = warning
+#   source: which JSON file this comes from
+
+# ============================================================
+# Recovery.json (576 records, daily)
+# ============================================================
+sources:
+  Recovery.json:
+    date_key: "Recovery Date"
+    description: "Daily recovery metrics measured during sleep"
+    fields:
+      - internal: recovery
+        whoop_keys: ["Recovery %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: true
+        aliases: [recovery_score, recovery_pct]
+        description: "Recovery score 0-100%"
+
+      - internal: hrv
+        whoop_keys: ["HRV (ms)"]
+        type: float
+        unit: "ms"
+        range: [0, 350]
+        required: true
+        aliases: [hrv_rmssd, hrv_rmssd_nocturnal, heart_rate_variability]
+        description: "Heart rate variability rMSSD during sleep"
+
+      - internal: rhr
+        whoop_keys: ["Resting Heart Rate (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [30, 120]
+        required: true
+        aliases: [resting_heart_rate, rhr_bpm]
+        description: "Resting heart rate measured during deep sleep"
+
+      - internal: resp_rate
+        whoop_keys: ["Respiratory Rate (rpm)"]
+        type: float
+        unit: "rpm"
+        range: [8, 30]
+        required: false
+        aliases: [respiratory_rate, breathing_rate]
+        description: "Respiratory rate during sleep"
+
+      - internal: spo2
+        whoop_keys: ["Blood Oxygen (SpO₂)"]
+        type: pct
+        unit: "%"
+        range: [80, 100]
+        required: false
+        aliases: [blood_oxygen, spo2_pct]
+        description: "Blood oxygen saturation"
+
+      - internal: skin_temp
+        whoop_keys: ["Skin Temp (°C)"]
+        type: float
+        unit: "°C"
+        range: [30, 40]
+        required: false
+        aliases: [skin_temperature, skin_temp_celsius]
+        description: "Skin temperature during sleep"
+
+      - internal: skin_temp_deviation
+        whoop_keys: ["Skin Temp Deviation (°C)"]
+        type: float
+        unit: "°C"
+        range: [-5, 5]
+        required: false
+        aliases: [temp_deviation]
+        description: "Deviation from personal skin temp baseline"
+
+      - internal: sleep_perf_recovery
+        whoop_keys: ["Sleep Performance %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Sleep performance as reported in recovery context"
+
+  # ============================================================
+  # Sleep.json (573 records, daily)
+  # ============================================================
+  Sleep.json:
+    date_key: "Sleep Start Date"
+    description: "Nightly sleep metrics"
+    fields:
+      - internal: sleep_perf
+        whoop_keys: ["Sleep Performance %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: true
+        aliases: [sleep_performance]
+        description: "Overall sleep performance score"
+
+      - internal: sleep_hours
+        whoop_keys: ["Hours of Sleep"]
+        type: duration
+        unit: "hours"
+        range: [0, 16]
+        required: true
+        aliases: [total_sleep, sleep_duration, hours_of_sleep]
+        description: "Total sleep duration"
+
+      - internal: sleep_consistency
+        whoop_keys: ["Sleep Consistency %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: true
+        aliases: [consistency]
+        description: "Sleep schedule consistency"
+
+      - internal: sleep_efficiency
+        whoop_keys: ["Sleep Efficiency %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: true
+        aliases: [efficiency, sleep_eff]
+        description: "Percentage of time in bed actually asleep"
+
+      - internal: in_bed_hrs
+        whoop_keys: ["Time in Bed"]
+        type: duration
+        unit: "hours"
+        range: [0, 16]
+        required: false
+        aliases: [time_in_bed]
+        description: "Total time in bed"
+
+      - internal: deep_hrs
+        whoop_keys: ["Deep Sleep (SWS)"]
+        type: duration
+        unit: "hours"
+        range: [0, 6]
+        required: true
+        aliases: [deep_sleep, deep_sws]
+        description: "Deep / slow-wave sleep duration"
+
+      - internal: rem_hrs
+        whoop_keys: ["REM Sleep"]
+        type: duration
+        unit: "hours"
+        range: [0, 6]
+        required: true
+        aliases: [rem_sleep, rem]
+        description: "REM sleep duration"
+
+      - internal: light_hrs
+        whoop_keys: ["Light Sleep"]
+        type: duration
+        unit: "hours"
+        range: [0, 10]
+        required: false
+        aliases: [light_sleep, light]
+        description: "Light sleep duration"
+
+      - internal: awake_time_hrs
+        whoop_keys: ["Awake Time"]
+        type: duration
+        unit: "hours"
+        range: [0, 4]
+        required: false
+        aliases: [awake_time, awake]
+        description: "Time awake during sleep period"
+
+      - internal: restorative_hrs
+        whoop_keys: ["Restorative Sleep (hrs)"]
+        type: duration
+        unit: "hours"
+        range: [0, 10]
+        required: false
+        aliases: [restorative_sleep]
+        description: "Deep + REM combined"
+
+      - internal: sleep_needed_hrs
+        whoop_keys: ["Sleep Needed (Total)"]
+        type: duration
+        unit: "hours"
+        range: [4, 14]
+        required: false
+        aliases: [sleep_needed, sleep_need]
+        description: "WHOOP-recommended sleep need"
+
+      - internal: wake_events
+        whoop_keys: ["Wake Events"]
+        type: int
+        unit: "count"
+        range: [0, 50]
+        required: false
+        aliases: [wake_count, awakenings]
+        description: "Number of wake events (micro-arousals)"
+
+      - internal: sleep_debt_added
+        whoop_keys: ["Sleep Debt (Added)"]
+        type: duration
+        unit: "hours"
+        range: [-5, 5]
+        required: false
+        aliases: [debt_added]
+        description: "Sleep debt added this night"
+
+      - internal: sleep_debt_hrs
+        whoop_keys: ["Sleep Debt (After Today)"]
+        type: duration
+        unit: "hours"
+        range: [0, 20]
+        required: false
+        aliases: [sleep_debt, debt_total]
+        description: "Cumulative sleep debt"
+
+      - internal: bed_time_raw
+        whoop_keys: ["Bed Time"]
+        type: str
+        unit: "time"
+        required: false
+        aliases: [bedtime_raw]
+        description: "Bedtime as string (needs parsing to hour)"
+
+      - internal: wake_time_raw
+        whoop_keys: ["Wake Time"]
+        type: str
+        unit: "time"
+        required: false
+        aliases: [waketime_raw]
+        description: "Wake time as string"
+
+      - internal: sleep_hr_avg
+        whoop_keys: ["Avg HR (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [30, 120]
+        required: false
+        aliases: [sleep_avg_hr]
+        description: "Average HR during sleep (NOT resting HR)"
+
+      - internal: sleep_hr_min
+        whoop_keys: ["Min HR (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [25, 100]
+        required: false
+        aliases: [sleep_min_hr]
+        description: "Minimum HR during sleep"
+
+      - internal: sleep_hr_max
+        whoop_keys: ["Max HR (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [40, 200]
+        required: false
+        aliases: [sleep_max_hr]
+        description: "Maximum HR during sleep"
+
+      - internal: sleep_stress_pct
+        whoop_keys: ["Sleep Stress %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: [sleep_stress]
+        description: "Percentage of sleep under stress"
+
+      - internal: deep_pct_raw
+        whoop_keys: ["Deep %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: [deep_pct_raw]
+        description: "Deep sleep percentage (raw from WHOOP)"
+
+      - internal: rem_pct_raw
+        whoop_keys: ["REM %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: [rem_pct_raw]
+        description: "REM sleep percentage (raw from WHOOP)"
+
+      - internal: light_pct_raw
+        whoop_keys: ["Light %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: [light_pct_raw]
+        description: "Light sleep percentage (raw from WHOOP)"
+
+      - internal: awake_pct
+        whoop_keys: ["Awake %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Awake percentage"
+
+      - internal: hours_vs_needed
+        whoop_keys: ["Hours vs Needed %"]
+        type: pct
+        unit: "%"
+        range: [0, 200]
+        required: false
+        aliases: [hours_vs_needed_pct]
+        description: "Sleep hours as percentage of need"
+
+      - internal: restorative_pct
+        whoop_keys: ["Restorative Sleep %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: [restorative_sleep_pct]
+        description: "Restorative (Deep+REM) as percentage"
+
+      - internal: sleep_stress_high_hrs
+        whoop_keys: ["Sleep Stress (High)"]
+        type: duration
+        unit: "hours"
+        range: [0, 12]
+        required: false
+        aliases: [sleep_stress_high]
+        description: "Hours of high stress during sleep"
+
+      - internal: sleep_stress_med_hrs
+        whoop_keys: ["Sleep Stress (Medium)"]
+        type: duration
+        unit: "hours"
+        range: [0, 12]
+        required: false
+        aliases: [sleep_stress_medium]
+        description: "Hours of medium stress during sleep"
+
+      - internal: sleep_stress_low_hrs
+        whoop_keys: ["Sleep Stress (Low)"]
+        type: duration
+        unit: "hours"
+        range: [0, 12]
+        required: false
+        aliases: [sleep_stress_low]
+        description: "Hours of low stress during sleep"
+
+      - internal: recent_strain
+        whoop_keys: ["Recent Strain"]
+        type: float
+        unit: "strain"
+        range: [0, 25]
+        required: false
+        aliases: [recent_strain_val]
+        description: "Recent strain impacting sleep"
+
+      - internal: optimal_bedtime_raw
+        whoop_keys: ["Optimal Bedtime"]
+        type: str
+        unit: "time"
+        required: false
+        aliases: [optimal_bedtime]
+        description: "WHOOP-recommended bedtime"
+
+      - internal: optimal_waketime_raw
+        whoop_keys: ["Optimal Waketime"]
+        type: str
+        unit: "time"
+        required: false
+        aliases: [optimal_waketime]
+        description: "WHOOP-recommended wake time"
+
+      - internal: healthy_minimum_hrs
+        whoop_keys: ["Healthy Minimum"]
+        type: duration
+        unit: "hours"
+        range: [4, 12]
+        required: false
+        aliases: [healthy_minimum]
+        description: "Minimum healthy sleep duration"
+
+  # ============================================================
+  # Strain.json (582 records, daily)
+  # ============================================================
+  Strain.json:
+    date_key: "Date"
+    description: "Daily strain and activity metrics"
+    fields:
+      - internal: strain
+        whoop_keys: ["Day Strain"]
+        type: float
+        unit: "strain"
+        range: [0, 21]
+        required: true
+        aliases: [day_strain, daily_strain]
+        description: "Overall daily strain score"
+
+      - internal: steps
+        whoop_keys: ["Steps"]
+        type: int
+        unit: "steps"
+        range: [0, 50000]
+        required: true
+        aliases: [daily_steps, step_count]
+        description: "Daily step count"
+
+      - internal: calories
+        whoop_keys: ["Calories"]
+        type: float
+        unit: "kcal"
+        range: [0, 10000]
+        required: false
+        aliases: [daily_calories, calories_burned]
+        description: "Total calories burned"
+
+      - internal: hr_zones_13_hrs
+        whoop_keys: ["HR Zones 1-3 (time)"]
+        type: duration
+        unit: "hours"
+        range: [0, 24]
+        required: false
+        aliases: [hr_zones_low, zones_13, low_intensity_hrs]
+        description: "Time in HR zones 1-3 (low-moderate intensity)"
+
+      - internal: hr_zones_45_hrs
+        whoop_keys: ["HR Zones 4-5 (time)"]
+        type: duration
+        unit: "hours"
+        range: [0, 6]
+        required: false
+        aliases: [hr_zones_high, zones_45, high_intensity_hrs]
+        description: "Time in HR zones 4-5 (high intensity)"
+
+      - internal: strength_time_hrs
+        whoop_keys: ["Strength Activity Time"]
+        type: duration
+        unit: "hours"
+        range: [0, 6]
+        required: false
+        aliases: [strength_time, strength_hrs]
+        description: "Time in strength activities"
+
+  # ============================================================
+  # VO2_Max.json (541 records, daily)
+  # ============================================================
+  VO2_Max.json:
+    date_key: "Date"
+    description: "Estimated VO2max"
+    fields:
+      - internal: vo2max
+        whoop_keys: ["VO2 Max (ml/kg/min)"]
+        type: float
+        unit: "ml/kg/min"
+        range: [15, 80]
+        required: true
+        aliases: [vo2_max, cardio_fitness]
+        description: "Estimated VO2max"
+
+  # ============================================================
+  # Total_Day_Stress.json (581 records, daily)
+  # ============================================================
+  Total_Day_Stress.json:
+    date_key: "Date"
+    description: "Daily stress totals by level"
+    fields:
+      - internal: stress_high_min
+        whoop_keys: ["High Stress Duration"]
+        type: duration
+        unit: "minutes"
+        range: [0, 1440]
+        required: false
+        aliases: [high_stress, stress_high]
+        description: "Minutes of high stress"
+
+      - internal: stress_med_min
+        whoop_keys: ["Medium Stress Duration"]
+        type: duration
+        unit: "minutes"
+        range: [0, 1440]
+        required: false
+        aliases: [medium_stress, stress_medium]
+        description: "Minutes of medium stress"
+
+      - internal: stress_low_min
+        whoop_keys: ["Low Stress Duration"]
+        type: duration
+        unit: "minutes"
+        range: [0, 1440]
+        required: false
+        aliases: [low_stress, stress_low]
+        description: "Minutes of low stress"
+
+  # ============================================================
+  # Healthspan.json (47 records, weekly)
+  # ============================================================
+  Healthspan.json:
+    date_key: "Week Start Date"
+    description: "Weekly healthspan metrics and component impacts"
+    frequency: weekly
+    fields:
+      - internal: healthspan_age
+        whoop_keys: ["Healthspan Age"]
+        type: float
+        unit: "years"
+        range: [15, 100]
+        required: false
+        aliases: [health_age]
+        description: "Biological age estimate"
+
+      - internal: pace_of_aging
+        whoop_keys: ["Pace of Aging"]
+        type: float
+        unit: "ratio"
+        range: [0, 3]
+        required: false
+        aliases: [aging_pace]
+        description: "Rate of aging (1.0 = normal)"
+
+      - internal: years_older_younger
+        whoop_keys: ["Years Older/Younger"]
+        type: float
+        unit: "years"
+        range: [-20, 20]
+        required: false
+        aliases: [age_delta]
+        description: "Years older/younger than chronological"
+
+      - internal: hs_sleep_consistency_impact
+        whoop_keys: ["Sleep Consistency Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: []
+        description: "Sleep consistency impact on healthspan"
+
+      - internal: hs_sleep_hours_impact
+        whoop_keys: ["Hours of Sleep Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: []
+        description: "Sleep hours impact on healthspan"
+
+      - internal: hs_zones13_impact
+        whoop_keys: ["HR Zones 1-3 Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: []
+        description: "Low-moderate activity impact on healthspan"
+
+      - internal: hs_zones45_impact
+        whoop_keys: ["HR Zones 4-5 Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: []
+        description: "High intensity impact on healthspan"
+
+      - internal: hs_strength_impact
+        whoop_keys: ["Strength Activity Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: []
+        description: "Strength training impact on healthspan"
+
+      - internal: hs_steps_impact
+        whoop_keys: ["Steps Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: []
+        description: "Daily steps impact on healthspan"
+
+      - internal: hs_vo2max_impact
+        whoop_keys: ["VO₂ Max Impact", "VO2 Max Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: [vo2max_impact]
+        description: "VO2max impact on healthspan"
+
+      - internal: hs_rhr_impact
+        whoop_keys: ["RHR Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: [rhr_impact]
+        description: "RHR impact on healthspan"
+
+      - internal: hs_lean_mass_impact
+        whoop_keys: ["Lean Body Mass Impact"]
+        type: years_impact
+        unit: "years"
+        range: [-5, 5]
+        required: false
+        aliases: []
+        description: "Lean body mass impact on healthspan"
+
+      - internal: hs_vo2max_30d
+        whoop_keys: ["VO₂ Max 30d", "VO2 Max 30d"]
+        type: float
+        unit: "ml/kg/min"
+        range: [15, 80]
+        required: false
+        aliases: []
+        description: "30-day VO2max average"
+
+      - internal: hs_rhr_30d
+        whoop_keys: ["RHR 30d (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [30, 120]
+        required: false
+        aliases: []
+        description: "30-day RHR average"
+
+      - internal: hs_steps_30d
+        whoop_keys: ["Steps 30d"]
+        type: float
+        unit: "steps"
+        range: [0, 50000]
+        required: false
+        aliases: []
+        description: "30-day steps average"
+
+      - internal: hs_zones13_weekly_30d
+        whoop_keys: ["HR Zones 1-3 Weekly 30d"]
+        type: duration
+        unit: "hours"
+        range: [0, 50]
+        required: false
+        aliases: []
+        description: "30-day average weekly zones 1-3 time"
+
+      - internal: hs_zones45_weekly_30d
+        whoop_keys: ["HR Zones 4-5 Weekly 30d"]
+        type: duration
+        unit: "hours"
+        range: [0, 20]
+        required: false
+        aliases: []
+        description: "30-day average weekly zones 4-5 time"
+
+      - internal: hs_vo2max_6mo
+        whoop_keys: ["VO₂ Max 6mo", "VO2 Max 6mo"]
+        type: float
+        unit: "ml/kg/min"
+        range: [15, 80]
+        required: false
+        aliases: []
+        description: "6-month VO2max average"
+
+      - internal: hs_rhr_6mo
+        whoop_keys: ["RHR 6mo (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [30, 120]
+        required: false
+        aliases: []
+        description: "6-month RHR average"
+
+      - internal: hs_sleep_consistency_30d
+        whoop_keys: ["Sleep Consistency 30d (%)"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "30-day sleep consistency"
+
+      - internal: hs_sleep_hours_30d
+        whoop_keys: ["Hours of Sleep 30d"]
+        type: duration
+        unit: "hours"
+        range: [0, 16]
+        required: false
+        aliases: []
+        description: "30-day sleep hours average"
+
+  # ============================================================
+  # Strain_Activities.json (277 records, per-activity)
+  # ============================================================
+  Strain_Activities.json:
+    date_key: "Activity Date"
+    description: "Individual activity/workout sessions"
+    frequency: per_activity
+    fields:
+      - internal: activity_name
+        whoop_keys: ["Activity Name"]
+        type: str
+        required: true
+        aliases: [activity, workout_name]
+        description: "Name of the activity"
+
+      - internal: activity_strain
+        whoop_keys: ["Activity Strain"]
+        type: float
+        unit: "strain"
+        range: [0, 21]
+        required: false
+        aliases: [workout_strain]
+        description: "Strain from this activity"
+
+      - internal: activity_duration_min
+        whoop_keys: ["Duration"]
+        type: duration
+        unit: "minutes"
+        range: [0, 600]
+        required: false
+        aliases: [duration_min, workout_duration]
+        description: "Activity duration"
+
+      - internal: activity_avg_hr
+        whoop_keys: ["Avg HR (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [40, 220]
+        required: false
+        aliases: [avg_hr]
+        description: "Average heart rate during activity"
+
+      - internal: activity_max_hr
+        whoop_keys: ["Max HR (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [60, 230]
+        required: false
+        aliases: [max_hr]
+        description: "Max heart rate during activity"
+
+      - internal: activity_calories
+        whoop_keys: ["Calories"]
+        type: float
+        unit: "kcal"
+        range: [0, 5000]
+        required: false
+        aliases: [workout_calories]
+        description: "Calories burned in activity"
+
+      - internal: activity_steps
+        whoop_keys: ["Steps"]
+        type: int
+        unit: "steps"
+        range: [0, 50000]
+        required: false
+        aliases: [workout_steps]
+        description: "Steps during activity"
+
+      - internal: activity_distance
+        whoop_keys: ["Distance"]
+        type: float
+        unit: "km"
+        range: [0, 100]
+        required: false
+        aliases: [distance]
+        description: "Distance covered"
+
+      - internal: zone0_min
+        whoop_keys: ["Zone 0"]
+        type: duration
+        unit: "minutes"
+        range: [0, 600]
+        required: false
+        aliases: []
+        description: "Time in HR zone 0"
+
+      - internal: zone1_min
+        whoop_keys: ["Zone 1"]
+        type: duration
+        unit: "minutes"
+        range: [0, 600]
+        required: false
+        aliases: []
+        description: "Time in HR zone 1"
+
+      - internal: zone2_min
+        whoop_keys: ["Zone 2"]
+        type: duration
+        unit: "minutes"
+        range: [0, 600]
+        required: false
+        aliases: [z2_min]
+        description: "Time in HR zone 2"
+
+      - internal: zone3_min
+        whoop_keys: ["Zone 3"]
+        type: duration
+        unit: "minutes"
+        range: [0, 600]
+        required: false
+        aliases: [z3_min]
+        description: "Time in HR zone 3"
+
+      - internal: zone4_min
+        whoop_keys: ["Zone 4"]
+        type: duration
+        unit: "minutes"
+        range: [0, 600]
+        required: false
+        aliases: [z4_min]
+        description: "Time in HR zone 4"
+
+      - internal: zone5_min
+        whoop_keys: ["Zone 5"]
+        type: duration
+        unit: "minutes"
+        range: [0, 600]
+        required: false
+        aliases: [z5_min]
+        description: "Time in HR zone 5"
+
+  # ============================================================
+  # Health_Monitor.json (24 records, daily — limited history)
+  # ============================================================
+  Health_Monitor.json:
+    date_key: "Date"
+    description: "Health monitor readings (fills gaps in Recovery)"
+    fields:
+      - internal: skin_temp_baseline
+        whoop_keys: ["Skin Temp Baseline (°C)"]
+        type: float
+        unit: "°C"
+        range: [30, 40]
+        required: false
+        aliases: [temp_baseline]
+        description: "Skin temperature baseline"
+
+      - internal: skin_temp_hm
+        whoop_keys: ["Skin Temp (°C)"]
+        type: float
+        unit: "°C"
+        range: [30, 40]
+        required: false
+        aliases: []
+        merge_into: skin_temp
+        description: "Skin temp (Health Monitor source, merges into skin_temp)"
+
+      - internal: skin_temp_deviation_hm
+        whoop_keys: ["Skin Temp Deviation (°C)"]
+        type: float
+        unit: "°C"
+        range: [-5, 5]
+        required: false
+        aliases: []
+        merge_into: skin_temp_deviation
+        description: "Skin temp deviation (Health Monitor source)"
+
+      - internal: spo2_hm
+        whoop_keys: ["Blood Oxygen (SpO₂)"]
+        type: pct
+        unit: "%"
+        range: [80, 100]
+        required: false
+        aliases: []
+        merge_into: spo2
+        description: "SpO2 (Health Monitor source)"
+
+      - internal: rhr_hm
+        whoop_keys: ["RHR (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [30, 120]
+        required: false
+        aliases: []
+        merge_into: rhr
+        description: "RHR (Health Monitor source, fills gaps)"
+
+      - internal: hrv_hm
+        whoop_keys: ["HRV (ms)"]
+        type: float
+        unit: "ms"
+        range: [0, 350]
+        required: false
+        aliases: []
+        merge_into: hrv
+        description: "HRV (Health Monitor source, fills gaps)"
+
+      - internal: resp_rate_hm
+        whoop_keys: ["Respiratory Rate (rpm)"]
+        type: float
+        unit: "rpm"
+        range: [8, 30]
+        required: false
+        aliases: []
+        merge_into: resp_rate
+        description: "Respiratory rate (Health Monitor source)"
+
+  # ============================================================
+  # Naps.json (19 records, per-nap)
+  # ============================================================
+  Naps.json:
+    date_key: "Nap Date"
+    description: "Nap sessions with sleep stages"
+    frequency: per_nap
+    fields:
+      - internal: nap_hours
+        whoop_keys: ["Hours of Sleep"]
+        type: duration
+        unit: "hours"
+        range: [0, 4]
+        required: false
+        aliases: [nap_duration]
+        description: "Nap sleep duration"
+
+      - internal: nap_efficiency
+        whoop_keys: ["Efficiency %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Nap sleep efficiency"
+
+      - internal: nap_deep_pct
+        whoop_keys: ["Deep %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Nap deep sleep percentage"
+
+      - internal: nap_rem_pct
+        whoop_keys: ["REM %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Nap REM percentage"
+
+      - internal: nap_restorative_pct
+        whoop_keys: ["Restorative Sleep %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Nap restorative percentage"
+
+      - internal: nap_wake_events
+        whoop_keys: ["Wake Events"]
+        type: int
+        unit: "count"
+        range: [0, 20]
+        required: false
+        aliases: []
+        description: "Wake events during nap"
+
+      - internal: nap_resp_rate
+        whoop_keys: ["Respiratory Rate"]
+        type: float
+        unit: "rpm"
+        range: [8, 30]
+        required: false
+        aliases: []
+        description: "Respiratory rate during nap"
+
+  # ============================================================
+  # Recovery_Impact.json (22 records, per-factor)
+  # ============================================================
+  Recovery_Impact.json:
+    date_key: "Date"
+    description: "WHOOP-identified factors impacting recovery"
+    frequency: per_factor
+    fields:
+      - internal: impact_activity
+        whoop_keys: ["Activity/Behavior"]
+        type: str
+        required: false
+        aliases: []
+        description: "Activity or behavior name"
+
+      - internal: impact_pct
+        whoop_keys: ["Impact %"]
+        type: pct
+        unit: "%"
+        range: [-100, 100]
+        required: false
+        aliases: []
+        description: "Impact on recovery (%)"
+
+  # ============================================================
+  # Recovery_Activities.json (13 records, per-activity)
+  # ============================================================
+  Recovery_Activities.json:
+    date_key: "Activity Date"
+    description: "Recovery-specific activities (e.g., meditation)"
+    frequency: per_activity
+    fields:
+      - internal: recovery_activity_name
+        whoop_keys: ["Activity Name"]
+        type: str
+        required: false
+        aliases: []
+        description: "Recovery activity name"
+
+      - internal: recovery_activity_duration
+        whoop_keys: ["Duration"]
+        type: duration
+        unit: "minutes"
+        range: [0, 300]
+        required: false
+        aliases: []
+        description: "Recovery activity duration"
+
+      - internal: recovery_activity_stress_change
+        whoop_keys: ["Stress Change"]
+        type: float
+        unit: "delta"
+        range: [-100, 100]
+        required: false
+        aliases: []
+        description: "Stress change from recovery activity"
+
+  # ============================================================
+  # Stress_Monitor.json (24 records, per-interval — 30min)
+  # ============================================================
+  Stress_Monitor.json:
+    date_key: "Date"
+    description: "Intra-day stress at 30-min granularity"
+    frequency: per_interval
+    fields:
+      - internal: stress_avg
+        whoop_keys: ["Avg Stress"]
+        type: float
+        unit: "score"
+        range: [0, 4]
+        required: false
+        aliases: [average_stress]
+        description: "Average stress in interval"
+
+      - internal: stress_max
+        whoop_keys: ["Max Stress"]
+        type: float
+        unit: "score"
+        range: [0, 4]
+        required: false
+        aliases: [max_stress, peak_stress]
+        description: "Max stress in interval"
+
+      - internal: stress_min
+        whoop_keys: ["Min Stress"]
+        type: float
+        unit: "score"
+        range: [0, 4]
+        required: false
+        aliases: [min_stress]
+        description: "Min stress in interval"
+
+  # ============================================================
+  # Sleep_Timeline.json (24 records, per-stage)
+  # ============================================================
+  Sleep_Timeline.json:
+    date_key: "Sleep Start Date"
+    description: "Per-stage sleep timeline"
+    frequency: per_stage
+    fields:
+      - internal: sleep_stage
+        whoop_keys: ["Sleep Stage"]
+        type: str
+        required: false
+        aliases: []
+        description: "Sleep stage name (Wake, Light, Deep, REM)"
+
+      - internal: stage_duration_min
+        whoop_keys: ["Stage Duration (min)"]
+        type: float
+        unit: "minutes"
+        range: [0, 600]
+        required: false
+        aliases: []
+        description: "Duration of this stage"
+
+  # ============================================================
+  # Heart_Rate_Zones.json (2 records — zone definitions)
+  # ============================================================
+  Heart_Rate_Zones.json:
+    date_key: "Date"
+    description: "Personal HR zone boundary definitions"
+    frequency: static
+    fields:
+      - internal: zone_name
+        whoop_keys: ["Zone"]
+        type: str
+        required: false
+        aliases: []
+        description: "Zone name"
+
+      - internal: zone_hr_min
+        whoop_keys: ["HR Min (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [40, 230]
+        required: false
+        aliases: []
+        description: "Zone lower HR boundary"
+
+      - internal: zone_hr_max
+        whoop_keys: ["HR Max (bpm)"]
+        type: float
+        unit: "bpm"
+        range: [60, 230]
+        required: false
+        aliases: []
+        description: "Zone upper HR boundary"
+
+  # ============================================================
+  # Weight.json (1 record)
+  # ============================================================
+  Weight.json:
+    date_key: "Date"
+    description: "Body composition"
+    fields:
+      - internal: weight_kg
+        whoop_keys: ["Weight"]
+        type: float
+        unit: "kg"
+        range: [30, 200]
+        required: false
+        aliases: [weight, body_weight]
+        description: "Body weight"
+
+      - internal: body_fat_pct
+        whoop_keys: ["Body Fat (%)"]
+        type: pct
+        unit: "%"
+        range: [5, 60]
+        required: false
+        aliases: [body_fat, fat_pct]
+        description: "Body fat percentage"
+
+      - internal: lean_mass_pct
+        whoop_keys: ["Lean Body Mass (%)"]
+        type: pct
+        unit: "%"
+        range: [40, 95]
+        required: false
+        aliases: [lean_mass, lean_pct]
+        description: "Lean body mass percentage"
+
+      - internal: lean_mass_kg
+        whoop_keys: ["Lean Body Mass"]
+        type: float
+        unit: "kg"
+        range: [20, 150]
+        required: false
+        aliases: []
+        description: "Lean body mass absolute"
+
+  # ============================================================
+  # Strength_Training.json (5 records, per-workout)
+  # ============================================================
+  Strength_Training.json:
+    date_key: "Activity Date"
+    description: "Strength training sessions"
+    frequency: per_workout
+    fields:
+      - internal: strength_workout_name
+        whoop_keys: ["Workout"]
+        type: str
+        required: false
+        aliases: []
+        description: "Strength workout name"
+
+      - internal: strength_total_reps
+        whoop_keys: ["Total Reps"]
+        type: int
+        unit: "reps"
+        range: [0, 1000]
+        required: false
+        aliases: []
+        description: "Total reps in workout"
+
+      - internal: strength_total_sets
+        whoop_keys: ["Total Sets"]
+        type: int
+        unit: "sets"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Total sets in workout"
+
+      - internal: strength_total_weight
+        whoop_keys: ["Total Weight"]
+        type: float
+        unit: "kg"
+        range: [0, 50000]
+        required: false
+        aliases: []
+        description: "Total volume (weight)"
+
+      - internal: strength_muscular_pct
+        whoop_keys: ["Muscular %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Muscular load percentage"
+
+      - internal: strength_cardio_pct
+        whoop_keys: ["Cardio %"]
+        type: pct
+        unit: "%"
+        range: [0, 100]
+        required: false
+        aliases: []
+        description: "Cardio load percentage"
+
+  # ============================================================
+  # Physiological_Cycles.json (572 records)
+  # ============================================================
+  Physiological_Cycles.json:
+    date_key: "Date"
+    description: "Physiological cycle boundaries (for cycle-level analysis)"
+    fields:
+      - internal: cycle_id
+        whoop_keys: ["Cycle ID"]
+        type: str
+        required: false
+        aliases: []
+        description: "Unique cycle identifier"
+
+      - internal: cycle_start
+        whoop_keys: ["Start Datetime"]
+        type: datetime
+        required: false
+        aliases: []
+        description: "Cycle start datetime"
+
+      - internal: cycle_end
+        whoop_keys: ["End Datetime"]
+        type: datetime
+        required: false
+        aliases: []
+        description: "Cycle end datetime"
+
+  # ============================================================
+  # Healthspan_Ranges.json (22 records, per-metric)
+  # ============================================================
+  Healthspan_Ranges.json:
+    date_key: "Date"
+    description: "Impact ranges for each healthspan metric"
+    frequency: per_metric
+    fields:
+      - internal: hs_range_metric
+        whoop_keys: ["Metric"]
+        type: str
+        required: false
+        aliases: []
+        description: "Healthspan metric name"
+
+      - internal: hs_range_worst
+        whoop_keys: ["Worst Impact"]
+        type: float
+        unit: "years"
+        range: [-10, 0]
+        required: false
+        aliases: []
+        description: "Worst possible impact"
+
+      - internal: hs_range_best
+        whoop_keys: ["Best Impact"]
+        type: float
+        unit: "years"
+        range: [0, 10]
+        required: false
+        aliases: []
+        description: "Best possible impact"
+
+# ============================================================
+# Derived columns (computed by add_derived_features)
+# ============================================================
+derived:
+  # Sleep-derived
+  - internal: deep_pct
+    source: [deep_pct_raw, deep_hrs, sleep_hours]
+    type: pct
+    aliases: [deep_sleep_pct]
+    description: "Deep sleep % (from raw or computed from hours)"
+
+  - internal: rem_pct
+    source: [rem_pct_raw, rem_hrs, sleep_hours]
+    type: pct
+    aliases: [rem_sleep_pct]
+    description: "REM sleep % (from raw or computed from hours)"
+
+  - internal: light_pct
+    source: [light_pct_raw, light_hrs, sleep_hours]
+    type: pct
+    aliases: [light_sleep_pct]
+    description: "Light sleep % (from raw or computed from hours)"
+
+  - internal: bed_time_hour
+    source: [bed_time_raw]
+    type: float
+    aliases: [bedtime_hour, bedtime_time, bedtime, bed_time_adj, bedtime_deviation]
+    description: "Bedtime as decimal hour (0-24, adjusted for midnight)"
+
+  - internal: wake_time_hour
+    source: [wake_time_raw]
+    type: float
+    aliases: [wake_time, waketime_hour]
+    description: "Wake time as decimal hour"
+
+  - internal: stress_high_pct
+    source: [stress_high_min, stress_med_min, stress_low_min]
+    type: pct
+    aliases: [stress_daily, stress_level, stress_pct]
+    description: "High stress as percentage of total stress time"
+
+  # Rolling averages (7d, 14d, 30d)
+  - internal: "{col}_{window}"
+    source: "any numeric column"
+    type: float
+    pattern: true
+    windows: [7, 14, 30]
+    aliases_pattern: ["{col}_{window}d_rolling", "{col}_{window}d_avg"]
+    description: "Rolling average of {col} over {window} days"
+
+  # Lag features (prev_1d, prev_2d, prev_3d)
+  - internal: "prev_{lag}d_{col}"
+    source: "any numeric column"
+    type: float
+    pattern: true
+    lags: [1, 2, 3]
+    description: "Value of {col} {lag} days ago"
+
+  # Zone percentages (from activity zones)
+  - internal: "zone{n}_pct"
+    source: "zone{n}_min"
+    type: pct
+    pattern: true
+    aliases_pattern: ["z{n}_pct"]
+    description: "Zone {n} as percentage of total zone time"
+
+  # Weekly aggregates
+  - internal: z2_weekly
+    source: [zone2_min]
+    type: float
+    unit: "minutes"
+    aliases: [z2_minutes_weekly, zone2_minutes_weekly, moderate_activity_minutes_weekly]
+    description: "Weekly Z2 training volume"
+
+  # Activity aggregates (from Strain_Activities)
+  - internal: is_game_sport_day
+    source: [activity_name]
+    type: int
+    aliases: [activity_type, game_sport, is_game_day]
+    description: "1 if any activity is a game sport (soccer, padel, tennis, etc.)"
+
+  - internal: dominant_activity
+    source: [activity_name]
+    type: str
+    aliases: [dominant_sport, main_activity]
+    description: "Most common activity on that day"
+
+  - internal: n_activities
+    source: [activity_name]
+    type: int
+    aliases: [n_activities_day, activity_count]
+    description: "Number of activities on that day"
+
+  - internal: total_activity_min
+    source: [activity_duration_min]
+    type: float
+    unit: "minutes"
+    aliases: [total_activity_minutes]
+    description: "Total activity duration on that day"
+
+  # Interaction terms
+  - internal: hrv_rhr_ratio
+    source: [hrv, rhr]
+    type: float
+    aliases: [hrv_rhr]
+    description: "HRV / RHR ratio"
+
+  - internal: sleep_perf_recovery
+    source: [sleep_perf, recovery]
+    type: float
+    aliases: []
+    description: "Sleep performance × Recovery interaction"
+
+  - internal: deep_x_strain
+    source: [deep_pct, strain]
+    type: float
+    aliases: []
+    description: "Deep sleep % × Strain interaction"
+
+  # Nap aggregates (from Naps)
+  - internal: has_nap
+    source: [nap_hours]
+    type: int
+    aliases: [napped]
+    description: "1 if napped that day"
+
+  - internal: nap_total_hrs
+    source: [nap_hours]
+    type: float
+    unit: "hours"
+    aliases: [nap_duration_total]
+    description: "Total nap duration that day"
+
+  # Time features (added by ingest)
+  - internal: dow
+    source: [date]
+    type: int
+    aliases: [day_of_week, dayofweek, weekday]
+    description: "Day of week (0=Mon, 6=Sun)"
+
+  - internal: month
+    source: [date]
+    type: int
+    aliases: [month_num]
+    description: "Month number (1-12)"
+
+  # Lag aliases (prev_Xd_col from add_derived_features)
+  - internal: prev_1d_strain
+    source: [strain]
+    type: float
+    aliases: [strain_prev_day, strain_yesterday, yesterday_strain]
+    description: "Previous day strain"
+
+  - internal: prev_1d_recovery
+    source: [recovery]
+    type: float
+    aliases: [recovery_prev_day, recovery_yesterday]
+    description: "Previous day recovery"
+
+# ============================================================
+# Game sports classification
+# ============================================================
+game_sports:
+  - Soccer
+  - Padel
+  - Tennis
+  - Volleyball
+  - Paddle Tennis
+  - Badminton
+  - Squash
+  - Basketball
+  - Football
+  - Table Tennis
+  - Pickleball

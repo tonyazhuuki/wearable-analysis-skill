@@ -1,0 +1,210 @@
+# Training Hypotheses — Pre-registered for N=1 Wearable Data Analysis
+# Generated: 2026-02-12
+# Updated: 2026-03-20 (cleaned for external sharing — personal data removed)
+# Domain: Exercise physiology, training load, VO2max, mortality risk reduction
+# Sources: Peer-reviewed exercise science, epidemiology, and sports medicine literature
+# Consensus coverage: Training Polarization, Exercise × All Outcomes, Recovery & HRV,
+#   Menstrual Cycle × Wearable Metrics, Fasting & Autophagy, Strength Training Dose-Response,
+#   Body Comp × Biological Age, Wearable Vital Signs
+
+- id: TRAIN_001
+  domain: training
+  hypothesis: "80/20 polarized intensity distribution maximizes VO2max adaptation in endurance athletes"
+  source: "Seiler 2010 Scandinavian J Med Sci Sports; Stoggl & Sperlich 2014 Frontiers in Physiology"
+  prediction: "Weeks with approximately 80% Z1-Z2 and 20% Z4-Z5 (minimal Z3) show higher VO2max improvement rate than weeks with >25% Z3; however, game sports naturally create 15-25% Z3 which is structural, not a training error"
+  test_type: dose_response
+  test_spec: "dose_response(z2_pct_weekly, vo2max_30d_delta, bins=[60-70, 70-80, 80-90]) AND compare_vo2max_delta(polarized_weeks=(z3_pct < 10), threshold_weeks=(z3_pct > 20))"
+  variables: [z1_pct, z2_pct, z3_pct, z4_pct, z5_pct, vo2max]
+  population_effect: "Polarized training produced 11.7% VO2max improvement vs 7.2% threshold in 9-week RCT (Stoggl & Sperlich 2014, N=48)"
+  actionable: true
+  action_if_confirmed: "Deliberately structure non-game training as polarized: long Z2 sessions + short Z4-Z5 intervals; accept Z3 from game sports as unavoidable"
+  action_if_refuted: "Individual may respond better to threshold or pyramidal distribution; experiment with more Z3 blocks"
+  priority: high
+  consensus_ref:
+    - id: "training_pol"
+      finding: "POL > THR (SMD 0.56), POL ~ PYR; ZERO game-sport RCTs; game Z2 ~60% equivalent (Grade D); 30 graded studies"
+      grade: "B+ (meta-analysis, but zero game-sport RCTs)"
+      path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+    - id: "menstrual_cycle"
+      finding: "Cycle-based training periodization = null (d=0.06); autoregulation via RPE is superior to any phase-based scheme"
+      grade: "A (null)"
+      path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+    - id: "strength_rt"
+      finding: "Game sport interference on RT = negligible (Wilson 2012 ES -0.01); concurrent training works when RT and game sports are not same-day heavy"
+      grade: "B"
+      path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+
+- id: TRAIN_002
+  domain: training
+  hypothesis: "Minimum 120 minutes per week of Zone 2 training is needed for meaningful aerobic base building"
+  source: "Seiler 2010 Scandinavian J Med Sci Sports; Jones & Carter 2000 Sports Medicine"
+  prediction: "Weeks with Z2 duration >= 120 min show positive VO2max trend; weeks with Z2 < 90 min show stagnation or decline"
+  test_type: dose_response
+  test_spec: "dose_response(z2_weekly_minutes, vo2max_30d_delta, bins=[0-60, 60-90, 90-120, 120-180, 180+])"
+  variables: [z2_minutes_weekly, vo2max]
+  population_effect: "Aerobic adaptations (mitochondrial biogenesis, capillarization) require sustained sub-threshold stimulus; minimum effective dose approximately 2x45min/week (Seiler 2010)"
+  actionable: true
+  action_if_confirmed: "Ensure minimum 2x60min or 3x40min Z2 sessions per week as non-negotiable aerobic base"
+  action_if_refuted: "Lower threshold may be sufficient for this individual; adjust minimum to 90 min/week"
+  priority: high
+  consensus_ref:
+    - id: "training_pol"
+      finding: "Z2 physiology: 6 sub-adaptations (mitochondrial biogenesis, capillarization, fat oxidation, lactate clearance, stroke volume, peripheral O2 extraction); Z2 is iron-friendlier than Z3+"
+      grade: "B"
+      path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+    - id: "whoop_deep"
+      finding: "N=1 example: Z2 critically low at ~39 min/wk — far below any minimum effective dose"
+      grade: "N=1"
+      path: "health/automated_reviews/2026_02_whoop_deep_analysis/synthesis.md"
+    - id: "strength_rt"
+      finding: "RT 2x30min/wk within session budget; RT is iron-friendliest modality — can fit alongside Z2 without iron cost"
+      grade: "B"
+      path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+
+- id: TRAIN_003
+  domain: training
+  hypothesis: "Game sports (tennis, padel, football) naturally produce 15-25% Zone 3 time, which is structural to intermittent activity"
+  source: "Foster 1995 MSSE; Seiler & Kjerland 2006 MSSE"
+  prediction: "Game-sport session days have Z3 percentage 15-25%, significantly higher than non-game training days (expected Z3 < 10%)"
+  test_type: threshold
+  test_spec: "compare_distributions(zone3_pct, groupby=is_game_sport_day, threshold=1)"
+  variables: [is_game_sport_day, zone3_pct]
+  population_effect: "Intermittent sports produce 15-30% time in Z3 due to rally/rest patterns (Foster 1995); this is inherent, not trainable"
+  actionable: true
+  action_if_confirmed: "Accept Z3 from game sports as structural; compensate by keeping deliberate training sessions strictly Z2 or Z4-Z5"
+  action_if_refuted: "Game sports may not produce as much Z3 as expected; re-examine HR zone calibration"
+  priority: medium
+  consensus_ref:
+    - id: "training_pol"
+      finding: "Game Z2 ~60% equivalent of continuous Z2 (6 sub-adaptations, 30-90% equivalence range); ZERO game-sport RCTs; game sports naturally produce 15-25% Z3"
+      grade: "D (expert opinion, zero RCTs)"
+      path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+    - id: "training_pol"
+      finding: "IDA HR zones shifted 7-13 bpm — HR zone distribution in game sports may be misclassified during iron deficiency"
+      grade: "C"
+      path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+
+- id: TRAIN_004
+  domain: training
+  hypothesis: "VO2max is the single strongest predictor of all-cause mortality, independent of traditional risk factors"
+  source: "Mandsager 2018 JAMA Network Open (N=122,007); Ross 2016 Circulation"
+  prediction: "Each 1 MET increase in cardiorespiratory fitness associated with 13% reduction in all-cause mortality; VO2max should show clear positive trajectory with consistent training"
+  test_type: temporal
+  test_spec: "temporal_trajectory(vo2max, window=90d, trend='linear') AND calculate_met_equivalent(vo2max)"
+  variables: [vo2max]
+  population_effect: "HR 0.87 per 1-MET increase (Mandsager 2018); elite fitness vs low fitness: 5x mortality difference"
+  actionable: true
+  action_if_confirmed: "VO2max improvement is the single most important training outcome; prioritize it above aesthetics, strength PRs, or weight"
+  action_if_refuted: "N/A for N=1 mortality testing; this hypothesis is contextual motivation rather than testable at individual level"
+  priority: high
+  consensus_ref:
+    - id: "exercise_outcomes"
+      finding: "5 iron-clad findings; 3 dose tiers (150/250-350/>350 min/wk); 32 outcomes graded; VO2max = strongest single protective factor"
+      grade: "A"
+      path: "training/automated_reviews/2026_02_exercise_outcomes_consensus/consensus_reference.md"
+    - id: "lipid_cvd"
+      finding: "CRF/VO2max = strongest single protective CVD factor; protective constellation (high VO2max + high HDL + low CRP) is real"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_lipid_cvd_risk/consensus_reference.md"
+    - id: "body_comp_bioage"
+      finding: "VO2max as bioage proxy (Mandsager 2018); wearable Healthspan age predicted r=0.20-0.35 with DunedinPACE — measures fitness not aging"
+      grade: "B"
+      path: "health/automated_reviews/2026_03_body_comp_biological_age/consensus_reference.md"
+
+- id: TRAIN_005
+  domain: training
+  hypothesis: "150-300 minutes per week of moderate-intensity activity produces 22-31% all-cause mortality reduction"
+  source: "Paluch 2022 Lancet meta-analysis (15 studies, N=50,000+); WHO 2020 Guidelines"
+  prediction: "Weekly moderate activity minutes should consistently target 150-300 range; track adherence as percentage of weeks meeting threshold"
+  test_type: threshold
+  test_spec: "adherence_tracking(moderate_activity_weekly_minutes, target_range=[150, 300]) AND dose_response(moderate_weekly, recovery_mean)"
+  variables: [moderate_activity_minutes_weekly]
+  population_effect: "22% mortality reduction at 150 min/wk; 31% at 300 min/wk (Paluch 2022 meta-analysis)"
+  actionable: true
+  action_if_confirmed: "Maintain minimum 150 min/wk moderate activity; aim for 200-300 min/wk as sweet spot"
+  action_if_refuted: "N/A at individual level for mortality; but recovery/HRV response validates the dose"
+  priority: medium
+  consensus_ref:
+    - id: "exercise_outcomes"
+      finding: "3 dose tiers: 150 min/wk (22% ACM reduction), 250-350 (31%), >350 (diminishing returns); 12 null/negative findings"
+      grade: "A"
+      path: "training/automated_reviews/2026_02_exercise_outcomes_consensus/consensus_reference.md"
+
+- id: TRAIN_006
+  domain: training
+  hypothesis: "Diminishing returns above 300 min/week of moderate activity, but no J-curve (no increased risk at high volumes)"
+  source: "Ekelund 2016 BMJ meta-analysis (N=1,000,000+); Lee 2014 JACC"
+  prediction: "Recovery and HRV metrics plateau or show minimal improvement above 300 min/wk; no deterioration at 400-600 min/wk (disproving J-curve)"
+  test_type: dose_response
+  test_spec: "dose_response(total_activity_weekly_minutes, recovery_mean, bins=[0-100, 100-200, 200-300, 300-400, 400-500, 500+])"
+  variables: [total_activity_minutes_weekly, recovery_score, hrv_rmssd]
+  population_effect: "Point of diminishing returns at 300-400 min/wk; no excess risk even at 750+ min/wk (Ekelund 2016)"
+  actionable: true
+  action_if_confirmed: "Volume above 300 min/wk is fine but not necessary; focus additional time on intensity distribution rather than more volume"
+  action_if_refuted: "If recovery drops at high volumes, individual tolerance may be lower; cap weekly volume at personal threshold"
+  priority: low
+  consensus_ref:
+    - id: "exercise_outcomes"
+      finding: "No J-curve for all-cause mortality at high exercise volumes; diminishing returns above 300-400 min/wk"
+      grade: "A"
+      path: "training/automated_reviews/2026_02_exercise_outcomes_consensus/consensus_reference.md"
+    - id: "fasting"
+      finding: "Exercise AMPK 3-5x vs fasting 1.5-2x (>80% pathway overlap) — exercise alone captures most autophagy benefit"
+      grade: "B"
+      path: "nutrition/automated_reviews/2026_03_fasting_autophagy_consensus/consensus_reference.md"
+
+- id: TRAIN_007
+  domain: training
+  hypothesis: "Daily steps in 7000-10000 range is the optimal zone; marginal returns diminish above 10000"
+  source: "Paluch 2022 Lancet Public Health meta-analysis; Saint-Maurice 2020 JAMA"
+  prediction: "Days with 7000-10000 steps have highest recovery scores; below 4000 steps is associated with lower recovery; above 10000 shows plateau"
+  test_type: dose_response
+  test_spec: "dose_response(daily_steps, recovery_score, bins=[0-4000, 4000-7000, 7000-10000, 10000-13000, 13000+])"
+  variables: [daily_steps, recovery_score]
+  population_effect: "50-65% mortality reduction at 7000-10000 steps vs <4000 (Paluch 2022); plateau above 10000 (Saint-Maurice 2020)"
+  actionable: true
+  action_if_confirmed: "Target 7000-10000 steps daily as baseline NEAT; don't stress about exceeding 10000"
+  action_if_refuted: "Personal optimal step range may differ; recalibrate based on individual dose-response curve"
+  priority: medium
+  consensus_ref:
+    - id: "exercise_outcomes"
+      finding: "Steps dose-response included in 32 outcomes; 7000-10000 range captures most mortality benefit"
+      grade: "A"
+      path: "training/automated_reviews/2026_02_exercise_outcomes_consensus/consensus_reference.md"
+
+- id: TRAIN_008
+  domain: training
+  hypothesis: "Iron deficiency reduces VO2max by 3-7%; iron supplementation corrects this deficit within 8-12 weeks"
+  source: "Burden 2015 Sports Medicine systematic review; Hinton 2007 MSSE"
+  prediction: "VO2max trajectory shows improvement of 3-7% in the 8-12 weeks following iron supplementation initiation; IDA (ferritin <12) causes 5-7% deficit, IDNA (ferritin 12-20, Hb normal) causes 3-5% deficit"
+  test_type: causal_lag
+  test_spec: "interrupted_time_series(outcome=vo2max, intervention=iron_supplementation_start, pre_window=60d, post_window=90d)"
+  variables: [vo2max, ferritin, iron_supplementation_start_date]
+  population_effect: "VO2max improvement of 3.2-7.1% after iron supplementation in iron-deficient athletes (Burden 2015 systematic review, 17 studies)"
+  actionable: true
+  action_if_confirmed: "Iron repletion is a prerequisite for VO2max optimization; expect ceiling to rise as ferritin approaches 50+ ng/mL"
+  action_if_refuted: "VO2max limitation may not be iron-related; investigate other factors (training stimulus adequacy, overtraining, pulmonary limitation)"
+  priority: high
+  applies_to:
+    conditions: [iron_deficiency]
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "Iron->RHR->HRV cascade; ZERO direct RCTs for oral iron -> HRV in athletes; brain iron lag 8-20 weeks; full autonomic recovery 24-52+ weeks"
+      grade: "B+ (mechanistic)"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "training_pol"
+      finding: "IDA adaptation impairment 15-30%; IDA HR zones shifted 7-13 bpm; no sport-specific IDA training guidelines exist; Z2 is iron-friendlier"
+      grade: "C (no sport-specific guidelines)"
+      path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+    - id: "whoop_deep"
+      finding: "N=1 example: high VO2max (p98) despite iron deficiency; RHR identified as bottleneck"
+      grade: "N=1"
+      path: "health/automated_reviews/2026_02_whoop_deep_analysis/synthesis.md"
+    - id: "strength_rt"
+      finding: "RT hepcidin 40-60% lower than endurance; RT is most iron-friendly exercise; start immediately — neural adaptations are iron-independent"
+      grade: "B"
+      path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+    - id: "body_comp_bioage"
+      finding: "Lean mass at current low BF% explains <5% of wearable variance; Healthspan penalty = activity signal (RT hours)"
+      grade: "B"
+      path: "health/automated_reviews/2026_03_body_comp_biological_age/consensus_reference.md"

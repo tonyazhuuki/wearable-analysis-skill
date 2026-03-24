@@ -1,0 +1,267 @@
+# Menstrual Cycle x Wearable Metrics Hypotheses
+# Generated from /research pipeline (2026-03-11)
+# Updated: 2026-03-20 (cleaned for external sharing — personal data removed)
+# Source: 01_library/research/health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/
+#
+# Evidence summary:
+#   - Cycle-based training periodization = Grade D (McNulty 2020 d=0.06, null)
+#   - Skin temp = primary wearable cycle signal (SNR 1-5)
+#   - RHR luteal +2-4 bpm at group level
+#   - 30-40% of women show no HRV cycle effect
+#   - IDA likely adds flat RHR offset, not phase-dependent amplification
+#   - Wearable cycle tracking = zero peer-reviewed validation
+
+applies_to:
+  sex: [female]
+  requires: [menstrual_cycle_tracking]
+
+hypotheses:
+
+  - id: CYCLE_001
+    name: "Luteal RHR elevation"
+    description: "RHR is significantly higher in luteal phase vs follicular phase"
+    metric_primary: rhr
+    metric_secondary: null
+    direction: positive
+    expected_effect: "+2-4 bpm (population range)"
+    population_evidence: "Baker 2007 n=36; Moran 2000 n=15; meta-review Grade MODERATE"
+    test: "wilcoxon_signed_rank"
+    grouping: "cycle_phase"
+    groups: ["follicular", "luteal"]
+    confidence: 0.88
+    grade: "MODERATE"
+    tags: [cycle, rhr, luteal, confirmed]
+    consensus_ref:
+      - id: "menstrual_cycle"
+        finding: "RHR luteal +2-4 bpm at group level; 30-40% of women show no HRV cycle effect; skin temp = primary signal"
+        grade: "MODERATE"
+        path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+      - id: "recovery_hrv"
+        finding: "RHR decomposition: iron +1.5-3.5 bpm, non-iron +0.5-2.0 bpm — cycle effect is within non-iron component"
+        grade: "B+"
+        path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+
+  - id: CYCLE_002
+    name: "Luteal HRV suppression"
+    description: "HRV (RMSSD) is lower in luteal phase vs follicular phase"
+    metric_primary: hrv_rmssd
+    metric_secondary: null
+    direction: negative
+    expected_effect: "-5 to -20% RMSSD (population range); 30-40% non-responders"
+    population_evidence: "de Zambotti 2013; Brar 2015; Grade LOW; 30-40% non-responders"
+    test: "wilcoxon_signed_rank"
+    grouping: "cycle_phase"
+    groups: ["follicular", "luteal"]
+    confidence: 0.65
+    grade: "LOW"
+    tags: [cycle, hrv, luteal, individual_variability]
+    consensus_ref:
+      - id: "menstrual_cycle"
+        finding: "30-40% of women show NO HRV cycle variation; individual variability is the dominant factor"
+        grade: "LOW"
+        path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+      - id: "recovery_hrv"
+        finding: "HRV driven by iron->RHR->HRV cascade; cycle effect is secondary to iron status"
+        grade: "B+"
+        path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+
+  - id: CYCLE_003
+    name: "Luteal recovery score reduction"
+    description: "Wearable recovery score is lower in luteal phase"
+    metric_primary: recovery_score
+    metric_secondary: null
+    direction: negative
+    expected_effect: "-5 to -15 pp recovery (estimated from RHR/HRV effects)"
+    population_evidence: "No direct studies on wearable recovery scores by cycle phase"
+    test: "wilcoxon_signed_rank"
+    grouping: "cycle_phase"
+    groups: ["early_follicular", "late_luteal"]
+    confidence: 0.55
+    grade: "VERY LOW"
+    tags: [cycle, recovery, luteal]
+    consensus_ref:
+      - id: "menstrual_cycle"
+        finding: "No direct studies on wearable recovery by cycle phase; recovery is composite of RHR+HRV which both shift luteal"
+        grade: "VERY LOW"
+        path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+
+  - id: CYCLE_004
+    name: "Skin temperature luteal elevation"
+    description: "Skin temperature is higher in luteal phase (BBT effect)"
+    metric_primary: skin_temp
+    metric_secondary: null
+    direction: positive
+    expected_effect: "+0.2 to 0.5 degrees C"
+    population_evidence: "BBT literature Grade MODERATE; wrist temp noisier than core"
+    test: "wilcoxon_signed_rank"
+    grouping: "cycle_phase"
+    groups: ["follicular", "luteal"]
+    confidence: 0.72
+    grade: "MODERATE"
+    tags: [cycle, skin_temp, luteal, primary_signal]
+    consensus_ref:
+      - id: "menstrual_cycle"
+        finding: "Skin temp = ONLY reliable wearable cycle signal (SNR 1.5-5.0); luteal +0.3-0.5C"
+        grade: "MODERATE"
+        path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+      - id: "vital_signs"
+        finding: "Skin temp cycle amplitude overlaps illness detection threshold — cycle-phase normalization needed for illness detection in cycling women"
+        grade: "C+"
+        path: "health/automated_reviews/2026_03_wearable_vital_signs/consensus_reference.md"
+
+  - id: CYCLE_005
+    name: "IDA flat offset on RHR (not phase-dependent)"
+    description: "IDA adds a constant RHR elevation regardless of cycle phase — the cycle amplitude (follicular-to-luteal delta) does NOT change with iron status"
+    metric_primary: rhr
+    metric_secondary: null
+    direction: null
+    expected_effect: "Flat offset +1-3 bpm (IDA); cycle delta unchanged"
+    population_evidence: "No direct studies. Flat offset model = 55% probability (consensus estimate)"
+    test: "compare_epoch_amplitudes"
+    grouping: "iron_epoch"
+    groups: ["pre_iron", "post_iron"]
+    confidence: 0.40
+    grade: "VERY LOW"
+    tags: [cycle, iron, ida, rhr, flat_offset, underpowered]
+    applies_to:
+      conditions: [iron_deficiency]
+    consensus_ref:
+      - id: "menstrual_cycle"
+        finding: "IDA likely adds flat RHR offset (55% probability) not amplified cycle signal; IDA effect 3-5x larger than cycle effect"
+        grade: "D+ (no direct studies)"
+        path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+      - id: "recovery_hrv"
+        finding: "Iron +1.5-3.5 bpm RHR is additive to other RHR contributors"
+        grade: "B+"
+        path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+
+  - id: CYCLE_006
+    name: "Cycle-based training periodization null effect"
+    description: "Training periodized by cycle phase does NOT improve performance vs fixed or autoregulated training"
+    metric_primary: null
+    metric_secondary: null
+    direction: null
+    expected_effect: "d=0.06 (trivial, CI crosses zero)"
+    population_evidence: "McNulty 2020 meta n=1193; Wikstrom-Frisen 2017 DISCOUNT; Thompson 2020 null replication; Grade D"
+    test: "literature_convergence"
+    grouping: null
+    groups: null
+    confidence: 0.88
+    grade: "A (meta-analysis)"
+    tags: [cycle, training, periodization, null, confirmed]
+    consensus_ref:
+      - id: "menstrual_cycle"
+        finding: "McNulty 2020 meta d=0.06 = trivial; 'cycle syncing' commercially driven; autoregulation (RPE) already captures cycle effects"
+        grade: "A (null)"
+        path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+      - id: "training_pol"
+        finding: "No cycle-specific periodization in any training model; POL/PYR/THR all ignore cycle phase"
+        grade: "B+"
+        path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+      - id: "strength_rt"
+        finding: "RT adaptations not cycle-phase dependent; neural adaptations are the primary mechanism in early RT"
+        grade: "B"
+        path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+
+  - id: CYCLE_007
+    name: "Luteal sleep disruption"
+    description: "Sleep quality (WASO, efficiency, REM%) is worse in luteal phase"
+    metric_primary: sleep_efficiency
+    metric_secondary: sleep_hours
+    direction: negative
+    expected_effect: "Unclear magnitude; progesterone sedating but thermoregulation disruptive"
+    population_evidence: "Grade VERY LOW; small studies, inconsistent findings"
+    test: "wilcoxon_signed_rank"
+    grouping: "cycle_phase"
+    groups: ["follicular", "luteal"]
+    confidence: 0.35
+    grade: "VERY LOW"
+    tags: [cycle, sleep, luteal]
+    consensus_ref:
+      - id: "sleep"
+        finding: "Sleep architecture Grade A; progesterone is sedating but thermoregulation disruption may offset; net effect inconsistent"
+        grade: "VERY LOW (for cycle-specific)"
+        path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+      - id: "vital_signs"
+        finding: "Skin temp luteal elevation may disrupt sleep onset; nap timing 15:00-17:00 unaffected by cycle phase"
+        grade: "C"
+        path: "health/automated_reviews/2026_03_wearable_vital_signs/consensus_reference.md"
+
+  - id: CYCLE_008
+    name: "Menstrual phase iron absorption window"
+    description: "Hepcidin nadir during menstruation may create an optimal window for oral iron absorption"
+    metric_primary: null
+    metric_secondary: null
+    direction: null
+    expected_effect: "Theoretical — contradictory evidence (Laine 2016 vs other sources)"
+    population_evidence: "CONTRADICTED between streams; Grade D"
+    test: "lab_measurement"
+    grouping: null
+    groups: null
+    confidence: 0.25
+    grade: "VERY LOW"
+    tags: [cycle, iron, hepcidin, menstrual, contradicted]
+    applies_to:
+      conditions: [iron_deficiency]
+    consensus_ref:
+      - id: "menstrual_cycle"
+        finding: "Contradicted between streams; hepcidin nadir during menstruation is theoretical, not confirmed"
+        grade: "D"
+        path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+      - id: "strength_rt"
+        finding: "RT hepcidin response 40-60% lower than endurance — RT timing may matter more than cycle phase for iron absorption"
+        grade: "B (for RT hepcidin)"
+        path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+
+  - id: CYCLE_009
+    name: "Wearable cycle detection accuracy under IDA"
+    description: "IDA degrades RHR/HRV-based cycle detection (SNR -30-50%) while preserving skin temp signal (SNR -10-20%)"
+    metric_primary: null
+    metric_secondary: null
+    direction: negative
+    expected_effect: "Estimated 70-80% luteal detection, 55-70% phase +/-2 days accuracy"
+    population_evidence: "No studies of wearable cycle tracking in IDA women"
+    test: "cross_validation_lh_strips"
+    grouping: null
+    groups: null
+    confidence: 0.35
+    grade: "VERY LOW"
+    tags: [cycle, wearable, ida, detection, unvalidated]
+    applies_to:
+      conditions: [iron_deficiency]
+      devices: [whoop, oura, garmin]
+    consensus_ref:
+      - id: "menstrual_cycle"
+        finding: "Wearable cycle tracking has ZERO peer-reviewed validation; device activity cycles are not menstrual phases"
+        grade: "D"
+        path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+      - id: "vital_signs"
+        finding: "Signal hierarchy: RHR > HRV > Skin Temp > RR > SpO2; IDA raises noise floor but relative changes remain valid"
+        grade: "C"
+        path: "health/automated_reviews/2026_03_wearable_vital_signs/consensus_reference.md"
+
+  - id: CYCLE_010
+    name: "Cycle amplitude convergence with iron repletion"
+    description: "As ferritin rises toward 50-70 ng/mL, wearable cycle detection should improve (less noise from IDA)"
+    metric_primary: rhr
+    metric_secondary: hrv_rmssd
+    direction: positive
+    expected_effect: "RHR noise floor decreases as IDA resolves; cycle amplitude becomes more stable"
+    population_evidence: "Theoretical — predicted by Recovery & HRV Consensus (autonomic recovery 24-52 weeks)"
+    test: "longitudinal_variance_comparison"
+    grouping: "iron_epoch"
+    groups: ["pre_iron", "post_iron", "iron_replete"]
+    confidence: 0.45
+    grade: "VERY LOW"
+    tags: [cycle, iron, longitudinal, prediction]
+    applies_to:
+      conditions: [iron_deficiency]
+    consensus_ref:
+      - id: "recovery_hrv"
+        finding: "Full autonomic recovery 24-52+ weeks; RMSSD gain +5-40 ms — as iron repletes, noise floor drops"
+        grade: "B+"
+        path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+      - id: "body_comp_bioage"
+        finding: "Body composition at current low BF% explains <5% of wearable variance — iron status dominates"
+        grade: "B"
+        path: "health/automated_reviews/2026_03_body_comp_biological_age/consensus_reference.md"

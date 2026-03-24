@@ -1,0 +1,209 @@
+# Recovery Hypotheses — Pre-registered for N=1 Wearable Data Analysis
+# Generated: 2026-02-12
+# Updated: 2026-03-20 (cleaned for external sharing — personal data removed)
+# Domain: Recovery physiology, HRV, RHR, autonomic nervous system
+# Sources: Peer-reviewed sports science and cardiology literature
+# Consensus coverage: Recovery & HRV, Sleep, Training Polarization, Exercise Outcomes,
+#   Respiratory Rate, Menstrual Cycle × Wearable Metrics, Body Comp × Biological Age,
+#   Wearable Vital Signs, Strength Training Dose-Response
+
+- id: REC_001
+  domain: recovery
+  hypothesis: "HRV (rMSSD) is the primary predictor of self-reported and device-measured recovery"
+  source: "Buchheit 2014 Sports Medicine; Plews 2013 IJSPP"
+  prediction: "Correlation between nocturnal rMSSD and next-day recovery score r = 0.60-0.80 in athletes; expect r >= 0.40 in N=1 due to daily noise"
+  test_type: correlation
+  test_spec: "correlation(hrv_rmssd_nocturnal, recovery_score, method='spearman')"
+  variables: [hrv_rmssd, recovery_score]
+  population_effect: "r = 0.60-0.80 in athlete cohorts (Plews 2013); r = 0.40-0.60 in recreational (Buchheit 2014)"
+  actionable: true
+  action_if_confirmed: "Use HRV as primary recovery gauge; trust green/red days for training decisions"
+  action_if_refuted: "HRV may be too noisy for individual use; shift to RHR or composite metric"
+  priority: high
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "Only 3 Grade A interventions (sleep, iron, creatine); HRV is core recovery metric but RHR decomposition shows iron +1.5-3.5 bpm drives HRV via cascade"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+
+- id: REC_002
+  domain: recovery
+  hypothesis: "Resting heart rate (RHR) is a stronger daily-level predictor of recovery than HRV due to lower noise"
+  source: "Plews 2013 IJSPP; Buchheit 2014 Sports Medicine"
+  prediction: "RHR explains more daily variance in recovery (higher R-squared) than HRV; RHR CV 3-5% vs HRV CV 15-30%"
+  test_type: correlation
+  test_spec: "compare_r2(model1=ols(recovery ~ rhr), model2=ols(recovery ~ hrv_rmssd))"
+  variables: [rhr, hrv_rmssd, recovery_score]
+  population_effect: "RHR CV 3-5% vs HRV CV 15-30% (Plews 2013); RHR more reliable day-to-day"
+  actionable: true
+  action_if_confirmed: "Prioritize RHR for daily decisions; use HRV 7-day rolling average instead of daily"
+  action_if_refuted: "HRV daily values are informative enough; continue using both metrics equally"
+  priority: high
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "RHR decomposition: iron +1.5-3.5 bpm, non-iron +0.5-2.0 bpm, 40-50% overlap; RHR is THE bottleneck in iron->RHR->HRV->recovery cascade"
+      grade: "B+"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "whoop_deep"
+      finding: "N=1 example: RHR identified as bottleneck (iron->RHR->HRV->recovery); HRV decline fully mediated by RHR"
+      grade: "N=1"
+      path: "health/automated_reviews/2026_02_whoop_deep_analysis/synthesis.md"
+
+- id: REC_003
+  domain: recovery
+  hypothesis: "HRV-to-RHR ratio is a more stable composite metric than either HRV or RHR alone"
+  source: "Buchheit 2014 Sports Medicine"
+  prediction: "Coefficient of variation of HRV/RHR ratio < CV of HRV alone; ratio CV expected 8-15% vs HRV CV 15-30%"
+  test_type: threshold
+  test_spec: "compare_cv(hrv_rmssd, rhr, hrv_rmssd / rhr)"
+  variables: [hrv_rmssd, rhr]
+  population_effect: "Ratio reduces day-to-day noise by 30-50% compared to raw HRV (Buchheit 2014)"
+  actionable: true
+  action_if_confirmed: "Adopt HRV/RHR ratio as primary autonomic metric; set personal thresholds"
+  action_if_refuted: "Ratio adds complexity without benefit; stick to 7-day rolling HRV average"
+  priority: medium
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "Sigmoid model REJECTED -> threshold-with-diminishing-returns; HRV and RHR share iron->autonomic cascade but with 40-50% overlap"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+
+- id: REC_004
+  domain: recovery
+  hypothesis: "HRV-guided training (train hard only on green/high-HRV days) produces better VO2max adaptation than fixed schedule"
+  source: "Kiviniemi 2007 Medicine & Science in Sports & Exercise; Vesterinen 2016 EJAP"
+  prediction: "Periods where high-strain days coincide with high-HRV days show 2-5% greater VO2max improvement rate than mismatched periods"
+  test_type: interaction
+  test_spec: "compare_vo2max_delta(hrv_matched_training_periods, hrv_mismatched_training_periods)"
+  variables: [hrv_rmssd, strain, vo2max]
+  population_effect: "2-5% greater VO2max improvement over 8 weeks in HRV-guided group (Kiviniemi 2007, N=26)"
+  actionable: true
+  action_if_confirmed: "Implement strict HRV-guided training: high intensity only on green days; easy/rest on red days"
+  action_if_refuted: "Fixed training schedule is adequate; HRV-matching adds unnecessary complexity for this individual"
+  priority: high
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "HRV-guided training evidence exists but ZERO direct RCTs for oral iron -> HRV in athletes; full autonomic recovery 24-52+ weeks"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "training_pol"
+      finding: "POL > THR (SMD 0.56); IDA HR zones shifted 7-13 bpm — HRV-guided decisions must account for IDA-shifted baselines"
+      grade: "B"
+      path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+    - id: "menstrual_cycle"
+      finding: "Cycle-based training periodization = null (d=0.06); autoregulation (RPE) already captures cycle effects — same applies to HRV-guided"
+      grade: "A (null)"
+      path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+
+- id: REC_005
+  domain: recovery
+  hypothesis: "Previous-day strain is the 3rd most important recovery predictor after HRV and RHR"
+  source: "Manresa-Rocamora 2021 Sports Medicine; Bishop 2008 Sports Medicine"
+  prediction: "In multivariate model, previous-day strain ranks 3rd in feature importance; OR approximately 0.85 per SD increase in prior strain"
+  test_type: dose_response
+  test_spec: "logistic_regression(recovery_binary ~ hrv + rhr + strain_prev_day + sleep_hours, feature_importance=True)"
+  variables: [hrv_rmssd, rhr, strain_prev_day, sleep_hours, recovery_score]
+  population_effect: "OR 0.85 per SD increase in prior-day strain (Manresa-Rocamora 2021 meta-analysis)"
+  actionable: true
+  action_if_confirmed: "After high-strain days, proactively schedule easy day or rest; don't rely on morning HRV alone"
+  action_if_refuted: "Strain impact is already captured by HRV/RHR; no need for separate strain-based planning"
+  priority: medium
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "Training x recovery x sleep triangle; recovery interventions graded (20 interventions, corrected effect sizes)"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "exercise_outcomes"
+      finding: "3 dose tiers (150/250-350/>350 min/wk) with dose-response curves for each outcome"
+      grade: "A"
+      path: "training/automated_reviews/2026_02_exercise_outcomes_consensus/consensus_reference.md"
+    - id: "strength_rt"
+      finding: "RT strain signature different from endurance — wearables underestimate RT strain; RT recovery 24-48h (shorter than endurance)"
+      grade: "B"
+      path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+
+- id: REC_006
+  domain: recovery
+  hypothesis: "Full recovery after strain >15 requires minimum 2 days (48-72h for glycogen and hormonal recovery)"
+  source: "Bishop 2008 Sports Medicine; Meeusen 2013 EJSS"
+  prediction: "Recovery score does not return to personal baseline until day 2-3 after strain >15 events; day-1 recovery still suppressed by >10pp"
+  test_type: temporal
+  test_spec: "recovery_trajectory(trigger=strain > 15, window_days=4, metric=recovery_score)"
+  variables: [strain, recovery_score]
+  population_effect: "48-72h for glycogen repletion + cortisol normalization (Bishop 2008); 72h for neuromuscular recovery"
+  actionable: true
+  action_if_confirmed: "After strain >15 days, schedule 2 easy/rest days minimum before next high-intensity session"
+  action_if_refuted: "Individual recovery is faster than population average; can return to high intensity after 1 day"
+  priority: high
+  consensus_ref:
+    - id: "training_pol"
+      finding: "Deload 2:1 ratio; session budget 30/36 max; IDA adaptation impairment 15-30%"
+      grade: "B"
+      path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+    - id: "recovery_hrv"
+      finding: "Full autonomic recovery 24-52+ weeks (3 scenarios); CWI AVOID for IDA"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "strength_rt"
+      finding: "RT recovery 24-48h DOMS; repeated bout effect reduces recovery time; RT 2x/wk allows full recovery between sessions"
+      grade: "B"
+      path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+
+- id: REC_007
+  domain: recovery
+  hypothesis: "Iron deficiency (ferritin <30 ng/mL) suppresses HRV via elevated RHR through sympathetic activation"
+  source: "Yokusoglu 2007 Ann Noninvasive Electrocardiol; Tuncer 2009 Ann Hematol"
+  prediction: "During iron-deficient periods, HRV is 20-40% lower and RHR 3-8 bpm higher than post-repletion; iron supplementation start correlates with gradual RHR decrease and HRV increase over 4-12 weeks"
+  test_type: causal_lag
+  test_spec: "temporal_correlation(event=iron_supplementation_start, outcomes=[rhr_7d, hrv_7d], window_weeks=12, expected_lag_weeks=4-8)"
+  variables: [rhr, hrv_rmssd, ferritin, iron_supplementation_start_date]
+  population_effect: "IDA reduces HRV 20-40%, increases RHR 5-10 bpm (Yokusoglu 2007, N=40; Tuncer 2009, N=35)"
+  actionable: true
+  action_if_confirmed: "Iron repletion is critical for autonomic health; expect HRV/RHR normalization as ferritin rises above 30; adjust recovery expectations during deficiency"
+  action_if_refuted: "Iron status may not be primary driver of autonomic dysfunction; investigate other causes (stress, overtraining, thyroid)"
+  priority: high
+  applies_to:
+    conditions: [iron_deficiency]
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "Iron->RHR->HRV cascade (7 mechanisms); iron +1.5-3.5 bpm RHR; ZERO direct RCTs for oral iron -> HRV in athletes; brain iron lag 8-20 weeks; RMSSD gain +5-40 ms (80% CI)"
+      grade: "B+ (mechanistic, ZERO direct RCTs)"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "menstrual_cycle"
+      finding: "IDA likely adds flat RHR offset (55% probability) not amplified cycle signal; IDA effect 3-5x larger than cycle effect on wearables"
+      grade: "D+ (no direct studies)"
+      path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+    - id: "whoop_deep"
+      finding: "N=1 example: RHR identified as bottleneck; HRV decline fully mediated by RHR"
+      grade: "N=1"
+      path: "health/automated_reviews/2026_02_whoop_deep_analysis/synthesis.md"
+
+- id: REC_008
+  domain: recovery
+  hypothesis: "Skin temperature deviation >0.5 degrees C above personal baseline predicts illness or overreaching 1-3 days before symptom onset"
+  source: "Li 2017 PLOS ONE; Smarr 2020 Scientific Reports (Oura ring study)"
+  prediction: "Skin temperature elevations >0.5 degrees C above 14-day rolling mean precede illness/low-recovery events by 1-3 days with sensitivity >0.60"
+  test_type: threshold
+  test_spec: "threshold_analysis(predictor=skin_temp_deviation_from_14d_mean, threshold=0.5, outcome=recovery_drop_event, lead_days=[1,2,3])"
+  variables: [skin_temp, recovery_score]
+  population_effect: "Temp elevation detected 1-3 days pre-symptom in 65-80% of illness events (Smarr 2020, N=50)"
+  actionable: true
+  action_if_confirmed: "When skin temp >0.5 degrees C above baseline, preemptively reduce training load and prioritize sleep for 2-3 days"
+  action_if_refuted: "Skin temperature is too noisy or device-specific; rely on HRV/RHR for early warning instead"
+  priority: medium
+  applies_to:
+    sex: [female]
+    note: "In cycling women, menstrual cycle luteal phase adds +0.3-0.5C — must normalize for cycle phase"
+  consensus_ref:
+    - id: "menstrual_cycle"
+      finding: "Skin temp = primary wearable cycle signal (SNR 1.5-5.0); luteal +0.3-0.5C — MUST account for menstrual cycle as confounder in illness detection"
+      grade: "MODERATE"
+      path: "health/automated_reviews/2026_03_menstrual_cycle_wearable_metrics/consensus_reference.md"
+    - id: "resp_rate"
+      finding: "Multi-signal alarm required (RR + RHR + subjective); standalone single-metric utility near zero for healthy adults"
+      grade: "D+ (standalone)"
+      path: "health/automated_reviews/2026_03_respiratory_rate_consensus/consensus_reference.md"
+    - id: "vital_signs"
+      finding: "Skin temp illness detection sensitivity 30-50% standalone, 50-76% with RHR; menstrual cycle confound requires 6+ tracked cycles for normalization"
+      grade: "C+"
+      path: "health/automated_reviews/2026_03_wearable_vital_signs/consensus_reference.md"

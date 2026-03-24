@@ -1,0 +1,153 @@
+# Stress Hypotheses — Pre-registered for N=1 Wearable Data Analysis
+# Generated: 2026-02-12
+# Updated: 2026-03-20 (cleaned for external sharing — personal data removed)
+# Domain: Psychophysiology, stress-autonomic coupling, allostatic load
+# Sources: Peer-reviewed psychosomatic medicine, stress physiology, and sleep science literature
+# Consensus coverage: Stress Management, Recovery & HRV, Sleep, Training Polarization,
+#   Strength Training Dose-Response, Body Comp × Biological Age, Wearable Vital Signs
+
+- id: STRESS_001
+  domain: stress
+  hypothesis: "Daily physiological stress directly suppresses nocturnal HRV"
+  source: "Fohr 2017 Stress; Hall 2004 Psychosomatic Medicine"
+  prediction: "Negative correlation between daily high-stress percentage and same-night or next-night HRV; r = -0.20 to -0.35 at individual level"
+  test_type: causal_lag
+  test_spec: "causal_lag(predictor=stress_high_pct_daily, outcome=hrv_rmssd_nocturnal, lags=[0, 1], method='granger')"
+  variables: [stress_high_pct, hrv_rmssd]
+  population_effect: "r = -0.20 to -0.35 within-person (Fohr 2017, N=221 workers); r = -0.40 cross-sectionally (Hall 2004)"
+  actionable: true
+  action_if_confirmed: "High-stress days require compensatory recovery strategies (longer sleep, no evening training, relaxation protocol)"
+  action_if_refuted: "Stress-HRV coupling may be weak in this individual; stress tolerance may be higher than average"
+  priority: high
+  consensus_ref:
+    - id: "stress_mgmt"
+      finding: "Wearable stress decomposes to ~50-65% psychological in typical users; HPA axis physiology acute vs chronic; somatic-only Phase 1 recommended when iron-deficient (prefrontal impairment)"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+    - id: "recovery_hrv"
+      finding: "Iron->RHR->HRV cascade — stress adds to RHR via non-iron mechanisms (+0.5-2.0 bpm, 40-50% overlap with iron)"
+      grade: "B+"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+
+- id: STRESS_002
+  domain: stress
+  hypothesis: "Cumulative stress over 3+ consecutive high-stress days has a stronger effect on recovery than any single high-stress day"
+  source: "McEwen 1998 New England J Med (allostatic load theory); Epel 2018 PNAS"
+  prediction: "3-day rolling stress average explains 10-15% more variance in recovery than daily stress alone; cumulative stress R-squared > daily stress R-squared"
+  test_type: correlation
+  test_spec: "compare_r2(model1=ols(recovery ~ stress_daily), model2=ols(recovery ~ stress_3d_rolling))"
+  variables: [stress_daily, stress_3d_rolling, recovery_score]
+  population_effect: "Allostatic load accumulates non-linearly; 3+ days of elevated cortisol impairs recovery systems (McEwen 1998)"
+  actionable: true
+  action_if_confirmed: "Monitor 3-day stress trends, not just daily; after 2 consecutive high-stress days, proactively intervene (reduce training, extend sleep, social support)"
+  action_if_refuted: "Daily stress is sufficient predictor; individual may recover quickly from stress without accumulation"
+  priority: high
+  consensus_ref:
+    - id: "stress_mgmt"
+      finding: "Allostatic load McEwen model; burnout staging (Stage 1-3); fast recovery phenotype exists"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+
+- id: STRESS_003
+  domain: stress
+  hypothesis: "High stress combined with short sleep produces multiplicative (not merely additive) recovery impairment"
+  source: "Akerstedt 2007 J Sleep Research; Minkel 2012 Emotion"
+  prediction: "Interaction term (stress x sleep_hours) is significant in recovery prediction; high-stress + short-sleep days show recovery deficit greater than sum of individual effects"
+  test_type: interaction
+  test_spec: "interaction_regression(recovery ~ stress_daily + sleep_hours + stress_daily:sleep_hours, test_interaction_significance=True)"
+  variables: [stress_daily, sleep_hours, recovery_score]
+  population_effect: "Sleep restriction amplifies cortisol response to stress by 30-45% (Minkel 2012); combined effect on next-day functioning is supra-additive (Akerstedt 2007)"
+  actionable: true
+  action_if_confirmed: "On high-stress days, sleep protection is critical — extend sleep target by 30-60 min; never combine high stress with voluntary sleep restriction"
+  action_if_refuted: "Effects are additive, not multiplicative; standard sleep hygiene is sufficient regardless of stress level"
+  priority: high
+  consensus_ref:
+    - id: "stress_mgmt"
+      finding: "Systems dynamics: 10 feedback loops; stress-hepcidin pathway plausible but magnitude Grade D"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+    - id: "sleep"
+      finding: "4-day-type constraint-adapted protocol; sleep debt + stress = compound effect on recovery"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+
+- id: STRESS_004
+  domain: stress
+  hypothesis: "Evening stress (last 4 hours before bed) impairs sleep quality more than morning or midday stress"
+  source: "Brosschot 2010 Psychosomatic Medicine (perseverative cognition theory)"
+  prediction: "If time-of-day stress data is available: evening stress hours correlate more strongly with sleep onset latency and reduced deep sleep percentage than morning stress hours"
+  test_type: causal_lag
+  test_spec: "correlation(evening_stress_pct, sleep_onset_latency) vs correlation(morning_stress_pct, sleep_onset_latency)"
+  variables: [stress_by_time_of_day, sleep_onset_latency, deep_sleep_pct]
+  population_effect: "Pre-sleep worry increases sleep onset latency by 15-45 min and reduces SWS by 10-20% (Brosschot 2010)"
+  actionable: true
+  action_if_confirmed: "Implement strict wind-down protocol: no work/screens/stressful content 2h before bed; evening relaxation routine"
+  action_if_refuted: "Time-of-day stress distribution may not matter; overall stress load is what counts"
+  priority: medium
+  consensus_ref:
+    - id: "sleep"
+      finding: "Circadian biology Grade A; light exposure timing critical; evening wind-down protocol part of circadian intervention"
+      grade: "A"
+      path: "health/automated_reviews/2026_02_sleep_consensus/consensus_reference.md"
+    - id: "stress_mgmt"
+      finding: "Social > CBT > Breathwork > PMR > Meditation hierarchy; somatic interventions for evening wind-down"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+
+- id: STRESS_005
+  domain: stress
+  hypothesis: "Physical training strain and psychological stress share a common vagal suppression pathway, producing cumulative autonomic load"
+  source: "Hynynen 2011 EJAP; Stanley 2013 Sports Medicine"
+  prediction: "Days with both high training strain AND high psychological stress show lower recovery than days with either stressor alone; the combined effect is greater than either individual effect"
+  test_type: interaction
+  test_spec: "anova_2way(recovery ~ strain_category * stress_category) AND compare_recovery(high_strain_high_stress, high_strain_low_stress, low_strain_high_stress, low_strain_low_stress)"
+  variables: [strain, stress_daily, recovery_score, hrv_rmssd]
+  population_effect: "Combined physical + psychological stress reduces HRV 25-40% more than either alone (Hynynen 2011, N=9 overtrained athletes)"
+  actionable: true
+  action_if_confirmed: "Avoid high-intensity training on high-psychological-stress days; these stressors compound through shared sympathetic pathway"
+  action_if_refuted: "Physical and psychological stress may have independent recovery channels; can train hard even on stressful days"
+  priority: high
+  consensus_ref:
+    - id: "stress_mgmt"
+      finding: "Game sports = dual-function (stress relief + training); ~7 min/day net new stress management protocol"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+    - id: "training_pol"
+      finding: "IDA adaptation impairment 15-30%; session budget max 30/36; deload 2:1"
+      grade: "B"
+      path: "training/automated_reviews/2026_02_training_polarization/consensus_reference.md"
+    - id: "recovery_hrv"
+      finding: "Training x recovery x sleep triangle; full autonomic recovery 24-52+ weeks"
+      grade: "B+"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "strength_rt"
+      finding: "RT vagal suppression shorter (24-48h) vs endurance (48-72h); RT can be scheduled on moderate-stress days"
+      grade: "B"
+      path: "training/automated_reviews/2026_03_strength_training_dose_response/consensus_reference.md"
+
+- id: STRESS_006
+  domain: stress
+  hypothesis: "Chronic elevated stress (sustained >30 days) raises resting heart rate baseline independently of training load changes"
+  source: "Vrijkotte 2000 Psychosomatic Medicine; Thayer 2012 Neuroscience & Biobehavioral Reviews"
+  prediction: "30-day rolling stress average positively correlates with 30-day rolling RHR; 1-3 bpm RHR elevation during chronically stressed periods"
+  test_type: correlation
+  test_spec: "correlation(stress_30d_rolling, rhr_30d_rolling, method='pearson') AND detrend_for_training_volume(rhr_30d ~ stress_30d + training_volume_30d)"
+  variables: [stress_30d_rolling, rhr_30d_rolling, training_volume_30d]
+  population_effect: "Chronic work stress associated with 2-4 bpm higher RHR (Vrijkotte 2000, N=109 white-collar workers); effect persists after controlling for physical activity"
+  actionable: true
+  action_if_confirmed: "Rising RHR trend without training load change signals chronic stress accumulation; intervention needed at lifestyle level (workload, boundaries, recovery practices)"
+  action_if_refuted: "RHR is primarily driven by training adaptations; stress does not meaningfully shift resting autonomic tone in this individual"
+  priority: medium
+  consensus_ref:
+    - id: "recovery_hrv"
+      finding: "RHR decomposition: non-iron mechanisms +0.5-2.0 bpm (stress is one); 40-50% overlap with iron pathway"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_recovery_hrv_consensus/consensus_reference.md"
+    - id: "stress_mgmt"
+      finding: "Burnout staging (McEwen Stage 1-3); chronic stress -> allostatic overload -> RHR elevation; fast recovery phenotype exists"
+      grade: "B"
+      path: "health/automated_reviews/2026_02_stress_management_consensus/consensus_reference.md"
+    - id: "whoop_deep"
+      finding: "N=1 example: HRV decline fully mediated by RHR; RHR identified as bottleneck"
+      grade: "N=1"
+      path: "health/automated_reviews/2026_02_whoop_deep_analysis/synthesis.md"

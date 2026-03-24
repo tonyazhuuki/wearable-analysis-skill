@@ -1,0 +1,73 @@
+# Wearable Analysis — User Configuration
+# Copy this file to user_config.yaml and customize for your setup.
+# All paths are relative to your project root.
+
+# === User Profile ===
+profile:
+  sex: "female"             # "female" | "male" — used for population norms
+  age: 30                   # current age — used for percentile calculations
+  timezone: "Europe/Athens" # your timezone
+
+# === Device Configuration ===
+device:
+  type: "whoop"             # "whoop" | "oura" | "garmin" | "apple" | "csv"
+  data_dir: ""              # path to device data (relative to project root)
+                            # WHOOP: path to MCP JSON folder
+                            # Oura: path to export folder
+                            # Garmin: path to CSV export
+                            # If empty, will prompt during analysis
+
+# === Output ===
+output:
+  base_dir: "wearable_analysis_output"  # where analysis results go
+  figure_dpi: 300
+  figure_style: "seaborn-v0_8-whitegrid"
+
+# === Activity Classification ===
+# List your game/intermittent sports (produce structural Z3 time)
+game_sports:
+  - Soccer
+  - Tennis
+  - Padel
+  - Basketball
+  - Volleyball
+  - Badminton
+  - Squash
+  - Table Tennis
+  - Pickleball
+  - Football
+
+# === Analysis Parameters ===
+analysis:
+  min_days: 30              # minimum dataset size
+  ideal_days: 180           # ideal dataset size
+  correlation_threshold: 0.3
+  p_threshold: 0.05
+  fdr_method: "fdr_bh"
+  bootstrap_n: 1000
+  granger_max_lag: 5
+
+# === Hypothesis Domains ===
+# Enable/disable hypothesis domains based on your data and profile
+domains:
+  recovery: true
+  sleep: true
+  training: true
+  stress: true
+  interactions: true
+  cycle: false              # set true if tracking menstrual cycle
+  # NOTE: cycle hypotheses require sex: "female" and cycle tracking data
+
+# === Optional: Health Context ===
+# These are OPTIONAL — used for deeper personalization if provided
+# Leave empty if not applicable
+health_context:
+  conditions: []            # e.g., ["IDA", "hypothyroid", "PCOS"]
+  medications: []           # e.g., ["levothyroxine", "iron_bisglycinate"]
+  supplements: []           # e.g., ["creatine", "vitamin_d", "magnesium"]
+  genetics: {}              # e.g., {MTHFR: "T/T", CYP1A2: "A/C", FADS1: "T/T"}
+
+# === Optional: Consensus References ===
+# Path to consensus reference files for literature-first analysis
+# If not provided, hypotheses still work but without consensus grounding
+consensus_dir: ""           # e.g., "01_library/research" — base dir for consensus refs
