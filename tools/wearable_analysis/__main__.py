@@ -54,8 +54,11 @@ def cmd_portrait(args):
         sys_args += ['--output-dir', args.output_dir]
     sys_args += ['--sex', args.sex]
     sys_args += ['--age', str(args.age)]
+    sys_args += ['--device', getattr(args, 'device', 'whoop')]
     if args.html_only:
         sys_args += ['--html-only']
+    if getattr(args, 'no_open', False):
+        sys_args += ['--no-open']
     sys_args += ['--lang', args.lang]
 
     # Temporarily replace sys.argv for generate_portrait's parser
@@ -134,7 +137,7 @@ def _send_notification(html_path, args):
     from pathlib import Path
     from urllib.request import Request, urlopen
 
-    PERSONAL_OS_BOT_DIR = Path.home() / "Cursor" / "your-telegram-bot"
+    PERSONAL_OS_BOT_DIR = Path(os.getenv("TELEGRAM_BOT_DIR", Path.home() / ".telegram-bot"))
 
     # Load credentials
     bot_token = os.getenv("TELEGRAM_TOKEN")
@@ -270,12 +273,17 @@ def main():
                             help='Sex for population norms (male/female)')
     p_portrait.add_argument('--age', type=int, default=30,
                             help='Age for percentile calculations')
+    p_portrait.add_argument('--device', default='whoop',
+                            choices=['whoop', 'oura', 'garmin', 'csv'],
+                            help='Device type (default: whoop)')
     p_portrait.add_argument('--html-only', action='store_true',
                             help='Skip hypothesis testing, generate EDA + discovery + report only')
     p_portrait.add_argument('--lang', default='ru', choices=['ru', 'en'],
                             help='Report language (default: ru)')
     p_portrait.add_argument('--notify', action='store_true',
                             help='Send Telegram notification with summary + HTML')
+    p_portrait.add_argument('--no-open', action='store_true',
+                            help='Do not open HTML report in browser')
     p_portrait.set_defaults(func=cmd_portrait)
 
     # --- ingest ---

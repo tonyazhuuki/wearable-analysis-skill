@@ -48,12 +48,16 @@ def main():
                         help='Report language (default: ru)')
     parser.add_argument('--notify', action='store_true',
                         help='Send Telegram notification with summary + HTML report')
+    parser.add_argument('--device', default='whoop',
+                        choices=['whoop', 'oura', 'garmin', 'csv'],
+                        help='Device type (default: whoop)')
     parser.add_argument('--no-open', action='store_true',
                         help='Do not open HTML report in browser')
     args = parser.parse_args()
 
     # Import pipeline modules (after path setup)
     from wearable_analysis.ingest import ingest_whoop, add_derived_features
+    from wearable_analysis.adapters import get_adapter
     from wearable_analysis.discovery import run_discovery
     from wearable_analysis.report import compute_domain_grades, generate_html_report
     from wearable_analysis.personalize import population_comparison
@@ -94,11 +98,16 @@ def main():
     os.makedirs(os.path.join(output_dir, 'data'), exist_ok=True)
 
     # ── Step 1: Ingest ──────────────────────────────────────────────
-    logger.info(f"Ingesting WHOOP data from {data_dir}...")
-    result = ingest_whoop(data_dir, output_dir)
-    # ingest_whoop returns (master, activities, healthspan) tuple
-    df = result[0] if isinstance(result, tuple) else result
-    df = add_derived_features(df)
+    device = getattr(args, 'device', 'whoop')
+    logger.info(f"Ingesting {device} data from {data_dir}...")
+    if device == 'whoop':
+        result = ingest_whoop(data_dir, output_dir)
+        # ingest_whoop returns (master, activities, healthspan) tuple
+        df = result[0] if isinstance(result, tuple) else result
+        df = add_derived_features(df)
+    else:
+        adapter = get_adapter(device)
+        df = adapter.ingest(data_dir, output_dir)
     logger.info(f"Ingested {len(df)} days, {len(df.columns)} columns")
 
     # Save master CSV
@@ -178,7 +187,7 @@ def _notify_telegram(html_path, grades, df, args):
     from urllib.request import Request, urlopen
     import uuid
 
-    PERSONAL_OS_BOT_DIR = Path.home() / "Cursor" / "your-telegram-bot"
+    PERSONAL_OS_BOT_DIR = Path(os.getenv("TELEGRAM_BOT_DIR", Path.home() / ".telegram-bot"))
 
     # Load credentials (same pattern as tools/notify_research.py)
     bot_token = os.getenv("TELEGRAM_TOKEN")

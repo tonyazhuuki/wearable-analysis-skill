@@ -932,7 +932,9 @@ def test_hypothesis(hypothesis: dict, df: pd.DataFrame) -> dict:
         result['status'] = 'tested'
 
     except Exception as exc:
-        result['status'] = f'error: {exc}'
+        logger.debug(f"Hypothesis {h_id} error: {exc}")
+        result['status'] = 'skipped_error'
+        result['error_detail'] = str(exc)
         return result
 
     # ---- Bayesian updating (if population effect is available) ----

@@ -30,17 +30,33 @@ cp user_config.template.yaml user_config.yaml
 # Edit user_config.yaml: set sex, age, device type, data directory
 
 # 5. Install dependencies
-python3 -m venv .venv && source .venv/bin/activate
-pip install pandas numpy scipy scikit-learn matplotlib seaborn pyyaml statsmodels
+pip install -r requirements.txt
+# or manually:
+# pip install pandas numpy scipy scikit-learn matplotlib seaborn pyyaml statsmodels
 
 # 6. Run
 python -m wearable_analysis portrait --data-dir /path/to/whoop/json
+
+# Or with any CSV export:
+python -m wearable_analysis portrait --data-dir /path/to/csv/folder --device csv --sex female --age 35
 ```
 
 Or use as a Claude Code skill:
 ```
 /wearable-analysis whoop
 ```
+
+## Getting your data
+
+**WHOOP:** Settings → Data Export → Download JSON (or use WHOOP MCP for live sync)
+
+**Oura:** Export from Oura app or Oura Cloud → CSV. Use `--device csv`
+
+**Garmin:** Garmin Connect → Export CSV (Activities, Sleep, Steps). Use `--device csv`
+
+**Apple Watch:** Export from Apple Health as XML, convert to CSV. Use `--device csv`
+
+**Any CSV:** Put your CSV files in a folder. Ensure there's a `date` column. Map your columns to match the [core schema](tools/wearable_analysis/config.py) — the pipeline handles missing columns gracefully (skips hypotheses that need unavailable data).
 
 ## Output
 
