@@ -134,27 +134,12 @@ def cmd_discover(args):
 def _send_notification(html_path, args):
     """Send Telegram notification with portrait summary."""
     import json as _json
-    from pathlib import Path
     from urllib.request import Request, urlopen
 
-    PERSONAL_OS_BOT_DIR = Path(os.getenv("TELEGRAM_BOT_DIR", Path.home() / ".telegram-bot"))
-
-    # Load credentials
-    bot_token = os.getenv("TELEGRAM_TOKEN")
+    # Load credentials from environment variables.
+    # Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (TELEGRAM_TOKEN also accepted).
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("TELEGRAM_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
-
-    if not bot_token or not chat_id:
-        env_file = PERSONAL_OS_BOT_DIR / ".env"
-        if env_file.exists():
-            for line in env_file.read_text(encoding="utf-8").splitlines():
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                if line.startswith("TELEGRAM_TOKEN=") and not bot_token:
-                    bot_token = line.split("=", 1)[1].strip().strip("\"'")
-                elif line.startswith("ALLOWED_USERS=") and not chat_id:
-                    users = line.split("=", 1)[1].strip().strip("\"'")
-                    chat_id = users.split(",")[0].strip()
 
     if not bot_token or not chat_id:
         logger.warning("No Telegram credentials found — notification skipped")

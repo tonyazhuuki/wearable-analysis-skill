@@ -8,3 +8,16 @@ user_config.yaml
 *.csv
 *.png
 output/
+wearable_analysis_output/
+
+# Secrets & keys — never commit
+.env
+.env.*
+*.token
+*api*key*.json
+*secret*.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

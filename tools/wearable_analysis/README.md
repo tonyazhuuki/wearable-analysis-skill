@@ -66,7 +66,6 @@ wearable_analysis/
 ├── personalize.py       # Population comparison, anomaly detection
 ├── report.py            # Domain grading + HTML report generation
 ├── visualize.py         # Standardized figure generation (8 plot types)
-├── generate_portrait.py # Legacy entry point (use __main__.py instead)
 ├── schema.yaml          # Single source of truth for all WHOOP field mappings
 ├── user_config.yaml     # Your personal configuration (git-ignored)
 ├── user_config.template.yaml  # Template with all options documented
@@ -167,7 +166,14 @@ The `--notify` flag on the `portrait` command sends:
 1. A summary message with domain grades
 2. The HTML report as a document attachment
 
-Credentials are read from `your Telegram bot .env file` (same as other Second Brain tools).
+Set two environment variables to enable it:
+
+```bash
+export TELEGRAM_BOT_TOKEN="your-bot-token"   # from @BotFather
+export TELEGRAM_CHAT_ID="your-chat-id"
+```
+
+If either is missing, `--notify` is silently skipped.
 
 ## License
 

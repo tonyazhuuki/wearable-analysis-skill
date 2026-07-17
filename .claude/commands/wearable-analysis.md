@@ -187,7 +187,7 @@ CORE_SCHEMA = {
 }
 ```
 
-Для WHOOP: переиспользуй логику из `01_library/research/health/automated_reviews/2026_02_whoop_deep_analysis/scripts/preprocess_v2.py` — она уже обрабатывает все 20 MCP JSON файлов.
+Для WHOOP: используй `wearable_analysis/ingest.py` — он обрабатывает все MCP JSON файлы (маппинг полей — в `schema.yaml`).
 
 ### 1b. Derived features (автоматические)
 
@@ -558,7 +558,7 @@ bash tools/finalize_research.sh \
 
 ## Известные подводные камни
 
-- **WHOOP MCP JSON structure** — dict-of-dicts with `_metadata`/`data` nesting or direct dict; Activities = dict-of-lists. Ссылка: `preprocess_v2.py`
+- **WHOOP MCP JSON structure** — dict-of-dicts with `_metadata`/`data` nesting or direct dict; Activities = dict-of-lists. Ссылка: `wearable_analysis/ingest.py`
 - **Duration parsing** — WHOOP uses varied formats ("2h 30m", "1:30:00", "45m"). Нужен robust parser
 - **PEP 668** — use venv, not system pip
 - **SHAP on small N** — с 500-600 днями SHAP работает, но CI будут широкими. Используй TreeExplainer (быстрый)
